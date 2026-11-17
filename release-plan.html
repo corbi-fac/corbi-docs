@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checked Builds Release</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: one release as a matrix (one epic per owner across, three stories down), then lanes, gates and stories in full. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --ink: #172030; --muted: #5a6577; --line: #c8d0dc; --accent: #0d7f73; --accent-t: #e3f5f2;
+  --h: #0d7f73; --h-t: #e3f5f2; --out: #c45a12; --out-t: #fdf0e6; --new: #2457c9; --new-t: #eaf0fd;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4; --accent-t: #10302d;
+  --h: #3fc4b4; --h-t: #10302d; --out: #f0954f; --out-t: #33210f; --new: #6f9bf5; --new-t: #16233f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4; --accent-t: #10302d;
+  --h: #3fc4b4; --h-t: #10302d; --out: #f0954f; --out-t: #33210f; --new: #6f9bf5; --new-t: #16233f; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+header { display: grid; gap: 12px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 44px/1.05 var(--display); margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h2 { font: 600 24px/1.2 var(--display); margin: 0; text-wrap: balance; }
+h3 { font: 600 17px/1.3 var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 72ch; }
+.lede { font-size: 18px; }
+.muted { color: var(--muted); }
+section { display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 6px; }
+.sec-head .eyebrow { color: var(--accent); }
+code { font-family: var(--mono); font-size: .88em; }
+.facts { display: flex; flex-wrap: wrap; gap: 12px 36px; margin-top: 8px; padding-top: 18px; border-top: 2px solid var(--ink); }
+.facts dt { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.facts dd { margin: 2px 0 0; font: 700 28px/1 var(--display); font-variant-numeric: tabular-nums; }
+
+/* matrix */
+.matrix { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.epic { display: grid; grid-template-rows: auto auto 1fr 1fr 1fr auto; gap: 10px; min-width: 0; }
+.epic-head { border-top: 3px solid var(--ink); padding-top: 10px; display: grid; gap: 2px; align-content: start; }
+.epic-head.box-h { border-top-color: var(--accent); }
+.epic-head .box { font: 500 11px var(--mono); color: var(--muted); }
+.epic-head.box-h .box { color: var(--accent); font-weight: 600; }
+.demo { font-size: 13.5px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; align-content: start; text-decoration: none; color: inherit; min-width: 0; }
+.card:hover { border-color: var(--ink); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card .top { display: flex; align-items: baseline; gap: 8px; }
+.card .id { font: 600 13px var(--mono); }
+.card .d { font: 500 12px var(--mono); color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+.card .t { font: 500 14.5px/1.35 var(--sans); }
+.card .from { font: 400 11.5px var(--mono); color: var(--muted); }
+.epic-sum { font: 600 12px var(--mono); padding-top: 6px; border-top: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
+.epic-sum span { color: var(--muted); font-weight: 400; }
+@media (max-width: 1000px) { .matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .epic { grid-template-rows: none; } }
+
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; }
+.scroll { overflow-x: auto; padding: 16px; }
+figure svg { display: block; width: 100%; height: auto; min-width: 860px; color: var(--ink); }
+figcaption { border-top: 1px solid var(--line); padding: 12px 16px; font-size: 13.5px; color: var(--muted); }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+.tbl { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+tbody tr:last-child > * { border-bottom: 0; }
+thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.ids { font: 500 12.5px var(--mono); white-space: nowrap; }
+.ids a { color: var(--accent); }
+
+/* stories in full */
+.epic-block { display: grid; gap: 12px; }
+.epic-block > h3 { font-size: 19px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.epic-block > h3 .sub { font: 500 12px var(--mono); color: var(--muted); }
+.stories { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 14px; }
+.story { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; scroll-margin-top: 16px; }
+.story:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.story .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 500 12px var(--mono); color: var(--muted); }
+.story .meta .id { color: var(--ink); font-weight: 600; font-size: 13px; }
+.story .why { font-size: 14.5px; }
+.story h4 { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 4px 0 0; }
+.story dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; font-size: 14px; }
+.story dt { font-weight: 600; }
+.story dd { margin: 0; min-width: 0; }
+.story ol, .story ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; }
+.m { font: 600 10.5px var(--mono); color: var(--accent); background: var(--accent-t); border-radius: 3px; padding: 0 5px; margin-left: 4px; white-space: nowrap; }
+.today { font-size: 13.5px; background: var(--bg); border-left: 3px solid var(--line); padding: 6px 10px; }
+.today b { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
+.baseline { margin: 0; padding-left: 20px; columns: 2 300px; column-gap: 32px; font-size: 14.5px; }
+.baseline li { break-inside: avoid; margin-bottom: 4px; }
+.dep { font-size: 13.5px; color: var(--muted); }
+.dep b { color: var(--ink); font-weight: 600; }
+.wont { columns: 2 260px; column-gap: 32px; margin: 0; padding-left: 20px; font-size: 14.5px; }
+.wont li { break-inside: avoid; margin-bottom: 4px; }
+
+/* SVG vocabulary */
+.box-s { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.k-h { fill: var(--h-t); stroke: var(--h); stroke-width: 1.4; }
+.k-new { fill: var(--accent-t); stroke: var(--accent); stroke-width: 2.6; }
+.k-out { fill: var(--out-t); stroke: var(--out); stroke-width: 1.4; }
+.k-plus { fill: var(--new-t); stroke: var(--new); stroke-width: 1.4; }
+.lane { fill: var(--bg); stroke: none; }
+.frame { fill: var(--bg); stroke: var(--line); stroke-width: 1.4; }
+.th { font: 600 13px var(--sans); fill: var(--ink); }
+.tx { font: 400 10.5px var(--mono); fill: var(--muted); }
+.ta { font: 600 11px var(--mono); fill: var(--accent); }
+.tl { font: 500 12px var(--mono); fill: var(--ink); }
+.e { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.e-m { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.e-a { stroke: var(--accent); stroke-width: 2; fill: none; }
+.mk { fill: var(--ink); } .mk-m { fill: var(--muted); } .mk-a { fill: var(--accent); }
+.chip-a { fill: var(--accent); }
+.chip-t { font: 600 10.5px var(--mono); fill: var(--bg); }
+</style>
+</head>
+<body>
+<nav style="max-width:1240px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 0;font:500 13px 'IBM Plex Mono',ui-monospace,monospace"><a href="./" style="color:inherit;opacity:.7">← Corbi docs</a></nav>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Corbi · next release · 17 → 24 Nov 2026 · planned the Slipstream way · baseline: the harness stack on main</div>
+  <h1>Checked Builds</h1>
+  <p class="lede">An architect builds and refines a simple massing in Blender by chat. Corbi checks what it built, every run ends cleanly, and any answer can be reopened later. This release adds the <b>Sensors</b> and <b>Termination</b> boxes, which completes the course's harness diagram.</p>
+  <dl class="facts">
+    <div><dt>Target</dt><dd>Tue 24 Nov</dd></div>
+    <div><dt>Epics</dt><dd>5</dd></div>
+    <div><dt>Stories</dt><dd>15</dd></div>
+    <div><dt>Per epic</dt><dd>3 days</dd></div>
+    <div><dt>Total</dt><dd>15 days</dd></div>
+  </dl>
+</header>
+
+<!-- BASELINE -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Starting point</div><h2>What already works, so no story repeats it</h2></div>
+  <ul class="baseline">
+    <li>A prompt builds in Blender: the model reads the scene and runs <code>bpy</code> code in a loop until it answers</li>
+    <li>Each run sends the whole session chat back to the model, including earlier tool calls</li>
+    <li>A Blender error comes back to the model as a failed tool result</li>
+    <li>Every answer saves a <code>.blend</code> copy and a <code>models</code> row while Blender is open</li>
+    <li>Steps show live as compact lines, apart from markdown answers</li>
+    <li>Projects are created and loaded with the chat of their last-touched session</li>
+    <li>The LLM is picked from Anthropic or Gemini, depending on which keys are set</li>
+    <li>Blender is detected and launched, and its add-on is installed, from the app</li>
+  </ul>
+  <p class="muted">Each story below opens with a <b>Today</b> line: what happens now and the gap the story closes.</p>
+</section>
+
+<!-- MATRIX -->
+<section>
+  <div class="sec-head"><div class="eyebrow">The release</div><h2>One epic per person, three stories each, about three days each</h2></div>
+  <p class="muted">The starting point is the stack through <code>feat/123-save-blender-file</code> merged to <code>main</code>. That covers prompt-to-Blender, saving after every answer, progress labels, and loading a project with its chat. Each epic's owner demos its outcome on 24 Nov. Select a story to read it in full.</p>
+  <div class="matrix">
+    <div class="epic">
+      <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Agent loop</span></div>
+      <p class="demo">Builds a block, renames it, changes it by name, and talks an option through without Blender changing.</p>
+      <a class="card" href="#a1"><div class="top"><span class="id">A1</span><span class="d">1d</span></div><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
+      <a class="card" href="#a2"><div class="top"><span class="id">A2</span><span class="d">1d</span></div><div class="t">Refer to each building by name</div><div class="from">new</div></a>
+      <a class="card" href="#a3"><div class="top"><span class="id">A3</span><span class="d">1d</span></div><div class="t">Talk an idea through without touching Blender</div><div class="from">from #86</div></a>
+      <div class="epic-sum">3 days <span>· 1 + 1 + 1</span></div>
+    </div>
+    <div class="epic">
+      <div class="epic-head box-h"><h3>Check what was built</h3><span class="box">Sensors · new</span></div>
+      <p class="demo">A broken change gets caught and fixed in the same run, and the answer quotes measured figures.</p>
+      <a class="card" href="#b1"><div class="top"><span class="id">B1</span><span class="d">1.5d</span></div><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div></a>
+      <a class="card" href="#b2"><div class="top"><span class="id">B2</span><span class="d">1d</span></div><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div></a>
+      <a class="card" href="#b3"><div class="top"><span class="id">B3</span><span class="d">0.5d</span></div><div class="t">See which checks passed under each answer</div><div class="from">new</div></a>
+      <div class="epic-sum">3 days <span>· 1.5 + 1 + 0.5</span></div>
+    </div>
+    <div class="epic">
+      <div class="epic-head box-h"><h3>Finish a run cleanly</h3><span class="box">Termination · new</span></div>
+      <p class="demo">A runaway run stops at its limit, Stop works mid-run, and a stuck run asks for help.</p>
+      <a class="card" href="#c1"><div class="top"><span class="id">C1</span><span class="d">1d</span></div><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div></a>
+      <a class="card" href="#c2"><div class="top"><span class="id">C2</span><span class="d">1.5d</span></div><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div></a>
+      <a class="card" href="#c3"><div class="top"><span class="id">C3</span><span class="d">0.5d</span></div><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div></a>
+      <div class="epic-sum">3 days <span>· 1 + 1.5 + 0.5</span></div>
+    </div>
+    <div class="epic">
+      <div class="epic-head"><h3>Come back to my work</h3><span class="box">Memory · saves</span></div>
+      <p class="demo">Reopens a project and gets its model back in Blender, then carries on from an earlier save.</p>
+      <a class="card" href="#d1"><div class="top"><span class="id">D1</span><span class="d">1d</span></div><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d2"><div class="top"><span class="id">D2</span><span class="d">0.5d</span></div><div class="t">Opening a project puts its latest save back in Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d3"><div class="top"><span class="id">D3</span><span class="d">1.5d</span></div><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
+      <div class="epic-sum">3 days <span>· 1 + 0.5 + 1.5</span></div>
+    </div>
+    <div class="epic">
+      <div class="epic-head"><h3>Follow along</h3><span class="box">Progress feed · sessions</span></div>
+      <p class="demo">Sees only their own session's steps with failures marked, then switches between named sessions.</p>
+      <a class="card" href="#e1"><div class="top"><span class="id">E1</span><span class="d">1d</span></div><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
+      <a class="card" href="#e2"><div class="top"><span class="id">E2</span><span class="d">1d</span></div><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
+      <a class="card" href="#e3"><div class="top"><span class="id">E3</span><span class="d">1d</span></div><div class="t">Switch between a project's sessions</div><div class="from">replaces bookmarks</div></a>
+      <div class="epic-sum">3 days <span>· 1 + 1 + 1</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- LANES -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Order</div><h2>Each owner works down their own lane</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 440" role="img" aria-label="Five lanes, one per epic, each with three stories in order. Only three links cross lanes: B1 unlocks C3, E1 unlocks B3, and A1 and B1 share the code that reads the Blender scene.">
+    <defs>
+      <marker id="l-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="l-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <rect x="0" y="10" width="1100" height="76" class="lane"/>
+    <rect x="0" y="182" width="1100" height="76" class="lane"/>
+    <rect x="0" y="354" width="1100" height="76" class="lane"/>
+    <g class="tx"><text x="210" y="6">day 1</text><text x="500" y="6">days 2–3</text><text x="790" y="6">days 3–5</text></g>
+
+    <text x="16" y="44" class="th">Shape it by chat</text><text x="16" y="62" class="tx">owner A</text>
+    <text x="16" y="130" class="th">Check what was built</text><text x="16" y="148" class="tx">owner B</text>
+    <text x="16" y="216" class="th">Finish a run cleanly</text><text x="16" y="234" class="tx">owner C</text>
+    <text x="16" y="302" class="th">Come back to my work</text><text x="16" y="320" class="tx">owner D</text>
+    <text x="16" y="388" class="th">Follow along</text><text x="16" y="406" class="tx">owner E</text>
+
+    <!-- lane A -->
+    <rect x="210" y="26" width="250" height="44" rx="6" class="k-h"/><text x="224" y="53" class="tl">A1 Start from the scene</text>
+    <rect x="500" y="26" width="250" height="44" rx="6" class="k-h"/><text x="514" y="53" class="tl">A2 Buildings by name</text>
+    <rect x="790" y="26" width="250" height="44" rx="6" class="k-h"/><text x="804" y="53" class="tl">A3 Discuss only</text>
+    <line x1="460" y1="48" x2="498" y2="48" class="e" marker-end="url(#l-a)"/>
+    <!-- lane B -->
+    <rect x="210" y="112" width="250" height="44" rx="6" class="k-new"/><text x="224" y="139" class="tl">B1 Check every change</text>
+    <rect x="500" y="112" width="250" height="44" rx="6" class="k-new"/><text x="514" y="139" class="tl">B2 Measured figures</text>
+    <rect x="790" y="112" width="250" height="44" rx="6" class="k-new"/><text x="804" y="139" class="tl">B3 Checks in the chat</text>
+    <line x1="460" y1="134" x2="498" y2="134" class="e" marker-end="url(#l-a)"/>
+    <line x1="750" y1="134" x2="788" y2="134" class="e" marker-end="url(#l-a)"/>
+    <!-- lane C -->
+    <rect x="210" y="198" width="250" height="44" rx="6" class="k-new"/><text x="224" y="225" class="tl">C1 Step and time limits</text>
+    <rect x="500" y="198" width="250" height="44" rx="6" class="k-new"/><text x="514" y="225" class="tl">C2 Stop button</text>
+    <rect x="790" y="198" width="250" height="44" rx="6" class="k-new"/><text x="804" y="225" class="tl">C3 Stop when stuck</text>
+    <line x1="460" y1="220" x2="498" y2="220" class="e" marker-end="url(#l-a)"/>
+    <line x1="750" y1="220" x2="788" y2="220" class="e" marker-end="url(#l-a)"/>
+    <!-- lane D -->
+    <rect x="210" y="284" width="250" height="44" rx="6" class="k-plus"/><text x="224" y="311" class="tl">D1 Saves in the chat</text>
+    <rect x="500" y="284" width="250" height="44" rx="6" class="k-plus"/><text x="514" y="311" class="tl">D2 Reopen latest save</text>
+    <rect x="790" y="284" width="250" height="44" rx="6" class="k-plus"/><text x="804" y="311" class="tl">D3 Fork from a save</text>
+    <line x1="460" y1="306" x2="498" y2="306" class="e" marker-end="url(#l-a)"/>
+    <line x1="750" y1="306" x2="788" y2="306" class="e" marker-end="url(#l-a)"/>
+    <!-- lane E -->
+    <rect x="210" y="370" width="250" height="44" rx="6" class="k-plus"/><text x="224" y="397" class="tl">E1 My steps, failures marked</text>
+    <rect x="500" y="370" width="250" height="44" rx="6" class="k-plus"/><text x="514" y="397" class="tl">E2 Auto titles</text>
+    <rect x="790" y="370" width="250" height="44" rx="6" class="k-plus"/><text x="804" y="397" class="tl">E3 Session switcher</text>
+    <line x1="750" y1="392" x2="788" y2="392" class="e" marker-end="url(#l-a)"/>
+
+    <!-- cross-lane -->
+    <path d="M440 156 C440 180 820 172 820 196" class="e-a" marker-end="url(#l-h)"/>
+    <text x="640" y="180" text-anchor="middle" class="ta">B1 → C3</text>
+    <path d="M420 370 C420 300 880 230 880 158" class="e-a" marker-end="url(#l-h)"/>
+    <text x="880" y="262" class="ta">E1 → B3</text>
+    <line x1="300" y1="72" x2="300" y2="110" class="e-a" style="stroke-dasharray:4 4"/>
+    <text x="308" y="95" class="ta">shared scene reader</text>
+  </svg></div>
+  <figcaption><b>Only three links cross lanes,</b> so each owner can work almost independently. A1 and B1 both read the Blender scene, so they share one helper: whoever starts first writes it and the other reuses it. C3 needs B1's check results, and B3 needs E1's step display. Every lane starts on day 1.</figcaption>
+  </figure>
+</section>
+
+<!-- HARNESS AFTER -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Why this release</div><h2>The harness diagram once this release lands</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1180 560" role="img" aria-label="The course harness model after this release: Sensors filled by B1 to B3, feeding check reports into context; Termination filled by C1 to C3; context deepened by A1 to A3; progress feed by E1 to E3; saves by D1 to D3.">
+    <defs>
+      <marker id="h-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="h-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <rect x="530" y="12" width="180" height="58" rx="10" class="k-out"/>
+    <text x="620" y="36" text-anchor="middle" class="th">User</text><text x="620" y="55" text-anchor="middle" class="tx">web app</text>
+    <line x1="600" y1="70" x2="600" y2="106" class="e" marker-end="url(#h-a)"/>
+    <line x1="640" y1="148" x2="640" y2="72" class="e" marker-end="url(#h-a)"/>
+    <text x="648" y="96" class="tx">answer + steps</text>
+
+    <rect x="310" y="108" width="620" height="440" rx="16" class="frame"/>
+    <text x="330" y="132" class="th">Harness</text>
+
+    <rect x="330" y="148" width="180" height="96" rx="10" class="k-new"/>
+    <text x="420" y="172" text-anchor="middle" class="th">Sensors</text>
+    <text x="420" y="190" text-anchor="middle" class="tx">read the scene back</text>
+    <text x="420" y="204" text-anchor="middle" class="tx">volume · ground · size</text>
+    <text x="420" y="218" text-anchor="middle" class="tx">measured figures</text>
+    <rect x="352" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="369" y="237" text-anchor="middle" class="chip-t">B1</text>
+    <rect x="392" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="409" y="237" text-anchor="middle" class="chip-t">B2</text>
+    <rect x="432" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="449" y="237" text-anchor="middle" class="chip-t">B3</text>
+
+    <rect x="530" y="148" width="180" height="96" rx="10" class="k-plus"/>
+    <text x="620" y="172" text-anchor="middle" class="th">Progress feed</text>
+    <text x="620" y="190" text-anchor="middle" class="tx">steps apart from answers</text>
+    <text x="620" y="204" text-anchor="middle" class="tx">per session, titled</text>
+    <rect x="563" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="580" y="237" text-anchor="middle" class="chip-t">E1</text>
+    <rect x="603" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="620" y="237" text-anchor="middle" class="chip-t">E2</text>
+    <rect x="643" y="226" width="34" height="14" rx="3" class="chip-a"/><text x="660" y="237" text-anchor="middle" class="chip-t">E3</text>
+
+    <rect x="330" y="280" width="180" height="80" rx="10" class="k-h"/>
+    <text x="420" y="306" text-anchor="middle" class="th">Tools</text><text x="420" y="324" text-anchor="middle" class="tx">Blender, via MCP</text>
+    <rect x="530" y="280" width="180" height="80" rx="10" class="k-h"/>
+    <text x="620" y="306" text-anchor="middle" class="th">Agent loop ↻</text><text x="620" y="324" text-anchor="middle" class="tx">tools off in discuss mode</text>
+    <rect x="730" y="280" width="180" height="80" rx="10" class="k-h"/>
+    <text x="820" y="304" text-anchor="middle" class="th">Context</text><text x="820" y="320" text-anchor="middle" class="tx">+ named scene summary</text>
+    <text x="820" y="334" text-anchor="middle" class="tx">+ check reports</text>
+    <rect x="763" y="342" width="34" height="14" rx="3" class="chip-a"/><text x="780" y="353" text-anchor="middle" class="chip-t">A1</text>
+    <rect x="803" y="342" width="34" height="14" rx="3" class="chip-a"/><text x="820" y="353" text-anchor="middle" class="chip-t">A2</text>
+    <rect x="843" y="342" width="34" height="14" rx="3" class="chip-a"/><text x="860" y="353" text-anchor="middle" class="chip-t">A3</text>
+
+    <rect x="330" y="396" width="180" height="80" rx="10" class="k-h"/>
+    <text x="420" y="422" text-anchor="middle" class="th">MCP client</text><text x="420" y="440" text-anchor="middle" class="tx">unchanged</text>
+    <rect x="530" y="396" width="180" height="96" rx="10" class="k-new"/>
+    <text x="620" y="420" text-anchor="middle" class="th">Termination</text>
+    <text x="620" y="438" text-anchor="middle" class="tx">completed · step_limit</text>
+    <text x="620" y="452" text-anchor="middle" class="tx">timeout · cancelled · stuck</text>
+    <rect x="563" y="470" width="34" height="14" rx="3" class="chip-a"/><text x="580" y="481" text-anchor="middle" class="chip-t">C1</text>
+    <rect x="603" y="470" width="34" height="14" rx="3" class="chip-a"/><text x="620" y="481" text-anchor="middle" class="chip-t">C2</text>
+    <rect x="643" y="470" width="34" height="14" rx="3" class="chip-a"/><text x="660" y="481" text-anchor="middle" class="chip-t">C3</text>
+    <rect x="730" y="396" width="180" height="80" rx="10" class="k-h"/>
+    <text x="820" y="422" text-anchor="middle" class="th">Guides</text><text x="820" y="440" text-anchor="middle" class="tx">name objects; quote</text><text x="820" y="454" text-anchor="middle" class="tx">measured figures</text>
+
+    <rect x="730" y="500" width="180" height="40" rx="8" class="k-plus"/>
+    <text x="820" y="524" text-anchor="middle" class="tl">Save + persist</text>
+
+    <rect x="970" y="280" width="190" height="80" rx="10" class="k-out"/>
+    <text x="1065" y="306" text-anchor="middle" class="th">LLM</text><text x="1065" y="324" text-anchor="middle" class="tx">Anthropic · Gemini</text>
+    <rect x="160" y="396" width="130" height="80" rx="10" class="k-out"/>
+    <text x="225" y="422" text-anchor="middle" class="th">MCP server</text><text x="225" y="440" text-anchor="middle" class="tx">corbi_server</text>
+    <rect x="20" y="396" width="120" height="80" rx="10" class="box-s" style="stroke-dasharray:5 4"/>
+    <text x="80" y="422" text-anchor="middle" class="th">Blender</text><text x="80" y="440" text-anchor="middle" class="tx">the world</text>
+    <rect x="970" y="490" width="190" height="58" rx="10" class="box-s"/>
+    <text x="1065" y="514" text-anchor="middle" class="th">Saves</text><text x="1065" y="532" text-anchor="middle" class="tx">D1 · D2 · D3</text>
+
+    <line x1="420" y1="280" x2="420" y2="246" class="e-a" marker-end="url(#h-h)"/>
+    <text x="426" y="268" class="ta">after each change</text>
+    <path d="M510 160 H522 V130 H820 V278" class="e-a" marker-end="url(#h-h)"/>
+    <text x="826" y="226" class="ta">check report</text>
+    <path d="M510 200 H522 V262 H720 V444 H712" class="e-a" style="stroke-dasharray:5 4" marker-end="url(#h-h)"/>
+    <text x="726" y="382" class="ta" style="font-size:10px">stuck</text>
+    <line x1="620" y1="360" x2="620" y2="394" class="e" marker-end="url(#h-a)"/>
+    <line x1="420" y1="360" x2="420" y2="394" class="e" marker-start="url(#h-a)" marker-end="url(#h-a)"/>
+    <line x1="820" y1="396" x2="820" y2="362" class="e" marker-end="url(#h-a)"/>
+    <line x1="910" y1="310" x2="968" y2="310" class="e" marker-end="url(#h-a)"/>
+    <line x1="968" y1="334" x2="912" y2="334" class="e" marker-end="url(#h-a)"/>
+    <path d="M620 492 V520 H728" class="e" marker-end="url(#h-a)"/>
+    <line x1="910" y1="520" x2="968" y2="520" class="e" marker-end="url(#h-a)"/>
+    <line x1="330" y1="436" x2="292" y2="436" class="e" marker-start="url(#h-a)" marker-end="url(#h-a)"/>
+    <line x1="160" y1="436" x2="142" y2="436" class="e" marker-start="url(#h-a)" marker-end="url(#h-a)"/>
+  </svg></div>
+  <figcaption><b>Teal boxes with a thick outline are new this release.</b> A sensor reads the Blender scene back after each change and sends a check report into the model's context, the feedback arrow from the course diagram. Termination gets a reason for every way a run can end, and a check that keeps failing ends the run as <code>stuck</code>, which links the two new boxes. The other three epics add depth to boxes that are already built.</figcaption>
+  </figure>
+</section>
+
+<!-- DECISIONS -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Gates</div><h2>Decisions the team makes before the work they block</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Decision</th><th>Proposed</th><th>Blocks</th></tr></thead>
+    <tbody>
+      <tr><td>Step limit and time limit for a run</td><td>12 model turns, 120 seconds</td><td class="ids"><a href="#c1">C1</a></td></tr>
+      <tr><td>Thresholds for the checks</td><td>Ground at z = 0; no side longer than 500 m</td><td class="ids"><a href="#b1">B1</a></td></tr>
+      <tr><td>Floor-to-floor height used to count storeys</td><td>3.5 m</td><td class="ids"><a href="#b2">B2</a></td></tr>
+      <tr><td>Letting the model run Blender code, which ADR-004 now allows and AGENTS.md hard rule 2 forbids</td><td>Keep it, with B1's checks as the guard. A new ADR supersedes ADR-004, and hard rule 2 is reworded</td><td class="ids"><a href="#b1">B1</a></td></tr>
+      <tr><td>Saves and forks replace bookmarks</td><td>New ADR; ADR-009 withdrawn while still Proposed</td><td class="ids"><a href="#d3">D3</a> <a href="#e3">E3</a></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- STORIES IN FULL -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Stories in full</div><h2>Acceptance criteria are the contract</h2></div>
+  <p class="muted">Each criterion is tagged with how it's proved, using the methods in AGENTS.md: <code>app</code> is a logged manual Blender run, <code>unit</code> is a test with the scripted model and a recorded scene, and <code>api</code>, <code>db</code>, <code>browser</code>, <code>cli</code> and <code>code</code> are as listed there. Nothing in a test needs a running Blender or a live LLM.</p>
+
+  <div class="epic-block"><h3>Shape it by chat <span class="sub">3 days · Context · Agent loop</span></h3><div class="stories">
+    <article class="story" id="a1">
+      <div class="meta"><span class="id">A1</span><span>1 day</span><span>from #85</span></div>
+      <h3>Every run starts from the current scene</h3>
+      <p class="why">Before each prompt, Corbi reads what's in Blender and gives it to the model, so a follow-up edits what's there instead of building a second copy.</p>
+      <p class="today"><b>Today</b> Follow-ups can already work: the whole chat goes back to the model, and it can call <code>get_scene_info</code>. Nothing makes it look first, so it may add a second building instead of editing the first.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Scene known</dt><dd>Each run starts with a short summary of the scene's objects (name, size, position) in the model's context</dd></dl>
+      <h4>Not included</h4>
+      <ul><li>Undoing a change (D3 covers going back)</li></ul>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>The model's input for a run includes a summary of the scene's objects<span class="m">unit</span></li>
+        <li>After "a 4-storey block, 20 by 12 metres", the follow-up "make it 6 storeys" leaves one object, now 6 storeys tall<span class="m">app</span></li>
+        <li>With Blender closed, a follow-up still gets an answer, without a scene summary<span class="m">unit</span></li>
+      </ol>
+      <p class="dep"><b>Shares</b> the scene reader with B1</p>
+    </article>
+    <article class="story" id="a2">
+      <div class="meta"><span class="id">A2</span><span>1 day</span><span>new</span></div>
+      <h3>Refer to each building by name</h3>
+      <p class="why">Each building Corbi makes has a readable name, so the architect can say "make the tower taller" and only the tower changes.</p>
+      <p class="today"><b>Today</b> <code>get_scene_info</code> already returns object names, but nothing asks the model to name what it builds, so objects get Blender defaults such as <code>Cube.001</code>.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Naming</dt><dd>The system prompt tells the model to name every object it creates by its role, such as "Tower" or "Block A"</dd><dt>Summary</dt><dd>A1's scene summary lists objects by name</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Objects created in a run have readable names, not Blender defaults such as "Cube.001"<span class="m">app</span></li>
+        <li>With a tower and a podium in the scene, "make the tower 10 storeys" changes only the tower<span class="m">app</span></li>
+        <li>The system prompt carries the naming rule<span class="m">code</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> A1</p>
+    </article>
+    <article class="story" id="a3">
+      <div class="meta"><span class="id">A3</span><span>1 day</span><span>from #86</span></div>
+      <h3>Talk an idea through without touching Blender</h3>
+      <p class="why">An architect can discuss an idea with Corbi before anything changes in Blender, then ask it to build what they agreed.</p>
+      <p class="today"><b>Today</b> The model only has no tools when Blender is closed. With Blender open there's no way to talk without it acting, and every run saves a file even when nothing changed.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Switch</dt><dd>"Discuss only" next to the prompt box. While it's on, the run gets no tools</dd><dt>Memory</dt><dd>The discussion stays in the chat, so a later build prompt can refer to it</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>With the switch on, the run's tool list is empty and the scene is unchanged<span class="m">api</span></li>
+        <li>With the switch off, "build what we discussed" builds it<span class="m">app</span></li>
+        <li>A discuss-only answer makes no save<span class="m">db</span></li>
+      </ol>
+    </article>
+  </div></div>
+
+  <div class="epic-block"><h3>Check what was built <span class="sub">3 days · Sensors</span></h3><div class="stories">
+    <article class="story" id="b1">
+      <div class="meta"><span class="id">B1</span><span>1.5 days</span><span>new</span></div>
+      <h3>Corbi checks every change it makes and fixes its own mistakes</h3>
+      <p class="why">After every change Corbi makes in Blender, it reads the scene back and checks the result. It notices its own mistakes and fixes them before it answers.</p>
+      <p class="today"><b>Today</b> A <code>bpy</code> error already comes back to the model as a failed tool result. Code that runs without error but builds the wrong thing is never checked.</p>
+      <h4>Requirements</h4>
+      <dl><dt>When</dt><dd>After each tool call that changes the scene</dd><dt>Checks</dt><dd>Blender reported no error; every new object has volume; nothing is below ground; no side is longer than the size limit</dd><dt>Result</dt><dd>A check report in the model's context before its next turn</dd></dl>
+      <h4>Not included</h4>
+      <ul><li>Checks against a site boundary, which needs sites (later)</li></ul>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>After a scene-changing tool call, the checks run before the model's next turn<span class="m">unit</span></li>
+        <li>An object below ground or with no volume fails, and the model's next turn sees the report<span class="m">unit</span></li>
+        <li>A change that passes every check adds nothing to the model's context<span class="m">unit</span></li>
+        <li>The checks run in tests against a recorded scene, without Blender or a live LLM<span class="m">cli</span></li>
+      </ol>
+      <p class="dep"><b>Shares</b> the scene reader with A1 · <b>Blocked on</b> check thresholds; the decision on Blender code</p>
+    </article>
+    <article class="story" id="b2">
+      <div class="meta"><span class="id">B2</span><span>1 day</span><span>new</span></div>
+      <h3>Answers quote the figures measured in Blender</h3>
+      <p class="why">Corbi's answers give the height, footprint and floor area measured from the geometry, not figures the model came up with.</p>
+      <p class="today"><b>Today</b> Nothing is measured. Any height or area in an answer is the model's own claim.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Measured</dt><dd>Per object: height, footprint area, storeys from the floor-to-floor height, gross floor area</dd><dt>Where</dt><dd>Added to the check report at the end of a run. The system prompt tells the model to quote them</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>For a 20 × 12 m, 14 m tall block, the report gives 240 m² footprint and 4 storeys at 3.5 m<span class="m">unit</span></li>
+        <li>The final answer quotes the measured figures<span class="m">app</span></li>
+        <li>The measurement runs in tests without Blender<span class="m">cli</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> B1 · <b>Blocked on</b> floor-to-floor height</p>
+    </article>
+    <article class="story" id="b3">
+      <div class="meta"><span class="id">B3</span><span>0.5 day</span><span>new</span></div>
+      <h3>See which checks passed under each answer</h3>
+      <p class="why">The architect sees how the checks went without having to ask.</p>
+      <p class="today"><b>Today</b> Nothing about checks is shown, because there aren't any checks yet.</p>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Each answer shows a passed or failed summary of its checks<span class="m">browser</span></li>
+        <li>A failed check shows its message<span class="m">browser</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> B1, E1</p>
+    </article>
+  </div></div>
+
+  <div class="epic-block"><h3>Finish a run cleanly <span class="sub">3 days · Termination</span></h3><div class="stories">
+    <article class="story" id="c1">
+      <div class="meta"><span class="id">C1</span><span>1 day</span><span>new</span></div>
+      <h3>Every run ends within a step and time limit, and says why</h3>
+      <p class="why">A run can't loop forever. When it stops early, the architect is told why and loses nothing.</p>
+      <p class="today"><b>Today</b> The only cap is LangGraph's default recursion limit of 10,007 steps, which in practice means no limit. There's no time limit, and every run reports <code>completed</code>.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Limits</dt><dd>A step limit in model turns and a time limit in seconds</dd><dt>Reasons</dt><dd><code>completed</code>, <code>step_limit</code>, <code>timeout</code></dd><dt>Early stop</dt><dd>The scene is still saved and the chat still stored</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>A scripted model that always asks for a tool stops at the step limit with reason <code>step_limit</code><span class="m">unit</span></li>
+        <li>A run past the time limit stops with reason <code>timeout</code><span class="m">unit</span></li>
+        <li>After an early stop, the chat rows and the save are written<span class="m">db</span></li>
+        <li>A run whose model answers without tool calls ends with <code>completed</code>, as it does now<span class="m">unit</span></li>
+        <li><code>POST /agent/run</code> returns the reason, and the chat says why when it isn't <code>completed</code><span class="m">api</span></li>
+      </ol>
+      <p class="dep"><b>Blocked on</b> limit figures</p>
+    </article>
+    <article class="story" id="c2">
+      <div class="meta"><span class="id">C2</span><span>1.5 days</span><span>new</span></div>
+      <h3>Stop a run that is going the wrong way</h3>
+      <p class="why">The architect doesn't have to wait for a run they can already see is wrong.</p>
+      <p class="today"><b>Today</b> A run can't be interrupted. Closing the tab doesn't stop it: the run carries on on the server.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Control</dt><dd>A Stop button while a run is going</dd><dt>Result</dt><dd>The run ends within a few seconds with reason <code>cancelled</code>, and keeps what it had done</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Pressing Stop ends the run with reason <code>cancelled</code><span class="m">browser</span></li>
+        <li>The chat up to the stop is stored and the scene is saved<span class="m">db</span></li>
+        <li>The next prompt runs normally<span class="m">browser</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> C1</p>
+    </article>
+    <article class="story" id="c3">
+      <div class="meta"><span class="id">C3</span><span>0.5 day</span><span>new</span></div>
+      <h3>Corbi stops and asks when the same check keeps failing</h3>
+      <p class="why">If Corbi can't fix something, it asks the architect what to do instead of using up the step limit.</p>
+      <p class="today"><b>Today</b> A run that keeps failing carries on until the model gives up or something errors.</p>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>The same check failing on three turns in a row ends the run with reason <code>stuck</code><span class="m">unit</span></li>
+        <li>The answer names the failing check and asks how to proceed<span class="m">unit</span></li>
+        <li>A check that fails once and then passes doesn't stop the run<span class="m">unit</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> C1, B1</p>
+    </article>
+  </div></div>
+
+  <div class="epic-block"><h3>Come back to my work <span class="sub">3 days · Memory · saves</span></h3><div class="stories">
+    <article class="story" id="d1">
+      <div class="meta"><span class="id">D1</span><span>1 day</span><span>from #87</span></div>
+      <h3>See a save after every answer that changed Blender</h3>
+      <p class="why">Each answer that built something shows its save in the chat, so the architect can see their history and pick a point to go back to.</p>
+      <p class="today"><b>Today</b> Every answer already saves a <code>.blend</code> and a <code>models</code> row. The chat doesn't show them, there's no endpoint to list a session's saves, and each save is stamped before its own turn's messages.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Order</dt><dd>A run's chat rows are written before its save, so a save's time comes at or after every message of its turn</dd><dt>List</dt><dd><code>GET /sessions/{id}/models</code>, oldest first</dd><dt>In the chat</dt><dd>A save marker after each answer that saved</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>In a run, every chat row's <code>created_at</code> is at or before its save's<span class="m">db</span></li>
+        <li><code>GET /sessions/{id}/models</code> lists the saves oldest first<span class="m">api</span></li>
+        <li>Each answer that saved shows a save marker, including after a project is reloaded<span class="m">browser</span></li>
+      </ol>
+    </article>
+    <article class="story" id="d2">
+      <div class="meta"><span class="id">D2</span><span>0.5 day</span><span>from #87</span></div>
+      <h3>Opening a project puts its latest save back in Blender</h3>
+      <p class="why">The architect carries on where they stopped, with the model they left.</p>
+      <p class="today"><b>Today</b> Loading a project brings back its chat but not its model: Blender keeps whatever it already had open.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Open</dt><dd>The API asks Blender to open the latest save's file</dd><dt>Tools</dt><dd>Opening a file is called by the API and isn't offered to the model</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Loading a project opens its session's latest save in Blender<span class="m">app</span></li>
+        <li>The model's tool list has no file-opening tool<span class="m">code</span></li>
+        <li>With Blender closed, the project still loads and the chat says the file wasn't opened<span class="m">browser</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> D1</p>
+    </article>
+    <article class="story" id="d3">
+      <div class="meta"><span class="id">D3</span><span>1.5 days</span><span>replaces bookmarks</span></div>
+      <h3>Carry on from an earlier save in a new session</h3>
+      <p class="why">The architect picks an earlier save from the chat and continues from there, and the original session stays as it was.</p>
+      <p class="today"><b>Today</b> There's no way to go back. Bookmarks name a session but don't freeze or restore anything.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Latest save</dt><dd>Carry on in the same session</dd><dt>Older save</dt><dd>A new session in the same project, with the chat up to that save and a copy of its file</dd><dt>Schema</dt><dd>No new tables or columns</dd></dl>
+      <h4>Not included</h4>
+      <ul><li>Comparing two saves side by side</li></ul>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Picking an older save creates a session with the chats up to that save and a copy of its file<span class="m">db</span></li>
+        <li>Blender opens the copy and the next prompt runs in the new session<span class="m">app</span></li>
+        <li>The original session's chats and saves are unchanged<span class="m">db</span></li>
+        <li>Picking the latest save creates no session<span class="m">api</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> D2 · <b>Blocked on</b> the saves and forks ADR</p>
+    </article>
+  </div></div>
+
+  <div class="epic-block"><h3>Follow along <span class="sub">3 days · Progress feed · sessions</span></h3><div class="stories">
+    <article class="story" id="e1">
+      <div class="meta"><span class="id">E1</span><span>1 day</span><span>from #102</span></div>
+      <h3>See only my session's steps, with failures marked</h3>
+      <p class="why">While Corbi works, the architect sees only their own session's steps, and a step that failed is marked as failed.</p>
+      <p class="today"><b>Today</b> Steps already show as compact lines, apart from answers. But the feed is one list for the whole app, so every open tab sees every session's steps, and a failed tool call looks the same as one that worked.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Scope</dt><dd>The feed belongs to one session</dd><dt>Status</dt><dd>A step can be marked passed or failed. A tool call that errors shows as a failed step</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>Two sessions open in two tabs each see only their own steps<span class="m">browser</span></li>
+        <li>A tool call that errors shows as a failed step<span class="m">browser</span></li>
+        <li>A step message can carry a status, so B3 can show check results<span class="m">api</span></li>
+      </ol>
+    </article>
+    <article class="story" id="e2">
+      <div class="meta"><span class="id">E2</span><span>1 day</span><span>new</span></div>
+      <h3>Sessions name themselves from my first prompt</h3>
+      <p class="why">The architect can tell sessions apart without typing names, and can rename one.</p>
+      <p class="today"><b>Today</b> Sessions have a <code>name</code> column, but only the bookmark call sets it, so new sessions are unnamed.</p>
+      <h4>Requirements</h4>
+      <dl><dt>Title</dt><dd>A fast model call on the session's first prompt, alongside the run</dd><dt>Rename</dt><dd>A plain update of the session's name</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>After the first prompt, the session gets a short title<span class="m">api</span></li>
+        <li>A name typed before the title arrives is kept<span class="m">api</span></li>
+        <li>A failed title call leaves the name empty and the run unaffected<span class="m">unit</span></li>
+      </ol>
+    </article>
+    <article class="story" id="e3">
+      <div class="meta"><span class="id">E3</span><span>1 day</span><span>replaces bookmarks</span></div>
+      <h3>Switch between a project's sessions</h3>
+      <p class="why">A project shows its sessions by title, newest first, and the architect opens any of them with its chat.</p>
+      <p class="today"><b>Today</b> Loading a project opens only its last-touched session. The API can list bookmarked sessions, but the web app never shows them, so older sessions can't be reached.</p>
+      <h4>Requirements</h4>
+      <dl><dt>List</dt><dd><code>GET /projects/{id}/sessions</code>, which replaces the bookmarks list</dd><dt>Open</dt><dd>Opening a session loads its chat. D2 puts its latest save in Blender once it lands</dd></dl>
+      <h4>Acceptance criteria</h4>
+      <ol>
+        <li>The project view lists every session by title, newest first<span class="m">browser</span></li>
+        <li>Opening a session shows its own chat<span class="m">browser</span></li>
+        <li>The bookmark endpoints are gone and the contract is regenerated<span class="m">code</span></li>
+      </ol>
+      <p class="dep"><b>Depends on</b> E2 · <b>Blocked on</b> the saves and forks ADR</p>
+    </article>
+  </div></div>
+</section>
+
+<!-- WONT -->
+<section>
+  <div class="sec-head"><div class="eyebrow">Not this release</div><h2>Out of scope</h2></div>
+  <ul class="wont">
+    <li>Reading a PDF or Excel brief</li>
+    <li>Suggesting a site boundary from an address</li>
+    <li>Building-type generators and the massing schema (ADR-002)</li>
+    <li>Rhino and Revit</li>
+    <li>Evals over answer files</li>
+    <li>Checks against a site or planning envelope</li>
+    <li>Comparing saves side by side</li>
+    <li>More than one user</li>
+  </ul>
+</section>
+</div>
+
+</body>
+</html>
