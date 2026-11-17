@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Checked Builds Release</title>
+<title>Week Work Plan</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -42,7 +42,7 @@ code { font-family: var(--mono); font-size: .88em; }
 
 /* matrix */
 .matrix { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.epic { display: grid; grid-template-rows: auto auto 1fr 1fr 1fr auto; gap: 10px; min-width: 0; }
+.epic { display: grid; grid-template-rows: auto auto 1fr 1fr 1fr; gap: 10px; min-width: 0; }
 .epic-head { border-top: 3px solid var(--ink); padding-top: 10px; display: grid; gap: 2px; align-content: start; }
 .epic-head.box-h { border-top-color: var(--accent); }
 .epic-head .box { font: 500 11px var(--mono); color: var(--muted); }
@@ -123,78 +123,51 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
 <nav style="max-width:1240px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 0;font:500 13px 'IBM Plex Mono',ui-monospace,monospace"><a href="./" style="color:inherit;opacity:.7">← Corbi docs</a></nav>
 <div class="wrap">
 <header>
-  <div class="eyebrow">Corbi · next release · 17 → 24 Nov 2026 · planned the Slipstream way · baseline: the harness stack on main</div>
-  <h1>Checked Builds</h1>
+  <div class="eyebrow">Corbi · Checked Builds · 17 → 24 Nov 2026</div>
+  <h1>Week Work Plan</h1>
   <p class="lede">An architect builds and refines a simple massing in Blender by chat. Corbi checks what it built, every run ends cleanly, and any answer can be reopened later. This release adds the <b>Sensors</b> and <b>Termination</b> boxes, which completes the course's harness diagram.</p>
-  <dl class="facts">
-    <div><dt>Target</dt><dd>Tue 24 Nov</dd></div>
-    <div><dt>Epics</dt><dd>5</dd></div>
-    <div><dt>Stories</dt><dd>15</dd></div>
-    <div><dt>Per epic</dt><dd>3 days</dd></div>
-    <div><dt>Total</dt><dd>15 days</dd></div>
-  </dl>
+  
 </header>
-
-<!-- BASELINE -->
-<section>
-  <div class="sec-head"><div class="eyebrow">Starting point</div><h2>What already works, so no story repeats it</h2></div>
-  <ul class="baseline">
-    <li>A prompt builds in Blender: the model reads the scene and runs <code>bpy</code> code in a loop until it answers</li>
-    <li>Each run sends the whole session chat back to the model, including earlier tool calls</li>
-    <li>A Blender error comes back to the model as a failed tool result</li>
-    <li>Every answer saves a <code>.blend</code> copy and a <code>models</code> row while Blender is open</li>
-    <li>Steps show live as compact lines, apart from markdown answers</li>
-    <li>Projects are created and loaded with the chat of their last-touched session</li>
-    <li>The LLM is picked from Anthropic or Gemini, depending on which keys are set</li>
-    <li>Blender is detected and launched, and its add-on is installed, from the app</li>
-  </ul>
-  <p class="muted">Each story below opens with a <b>Today</b> line: what happens now and the gap the story closes.</p>
-</section>
 
 <!-- MATRIX -->
 <section>
-  <div class="sec-head"><div class="eyebrow">The release</div><h2>One epic per person, three stories each, about three days each</h2></div>
+  <div class="sec-head"><div class="eyebrow">The release</div><h2>One epic per person, three stories each</h2></div>
   <p class="muted">The starting point is the stack through <code>feat/123-save-blender-file</code> merged to <code>main</code>. That covers prompt-to-Blender, saving after every answer, progress labels, and loading a project with its chat. Each epic's owner demos its outcome on 24 Nov. Select a story to read it in full.</p>
   <div class="matrix">
     <div class="epic">
       <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Agent loop</span></div>
       <p class="demo">Builds a block, renames it, changes it by name, and talks an option through without Blender changing.</p>
-      <a class="card" href="#a1"><div class="top"><span class="id">A1</span><span class="d">1d</span></div><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
-      <a class="card" href="#a2"><div class="top"><span class="id">A2</span><span class="d">1d</span></div><div class="t">Refer to each building by name</div><div class="from">new</div></a>
-      <a class="card" href="#a3"><div class="top"><span class="id">A3</span><span class="d">1d</span></div><div class="t">Talk an idea through without touching Blender</div><div class="from">from #86</div></a>
-      <div class="epic-sum">3 days <span>· 1 + 1 + 1</span></div>
+      <a class="card" href="#a1"><div class="top"><span class="id">A1</span></div><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
+      <a class="card" href="#a2"><div class="top"><span class="id">A2</span></div><div class="t">Refer to each building by name</div><div class="from">new</div></a>
+      <a class="card" href="#a3"><div class="top"><span class="id">A3</span></div><div class="t">Talk an idea through without touching Blender</div><div class="from">from #86</div></a>
     </div>
     <div class="epic">
       <div class="epic-head box-h"><h3>Check what was built</h3><span class="box">Sensors · new</span></div>
       <p class="demo">A broken change gets caught and fixed in the same run, and the answer quotes measured figures.</p>
-      <a class="card" href="#b1"><div class="top"><span class="id">B1</span><span class="d">1.5d</span></div><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div></a>
-      <a class="card" href="#b2"><div class="top"><span class="id">B2</span><span class="d">1d</span></div><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div></a>
-      <a class="card" href="#b3"><div class="top"><span class="id">B3</span><span class="d">0.5d</span></div><div class="t">See which checks passed under each answer</div><div class="from">new</div></a>
-      <div class="epic-sum">3 days <span>· 1.5 + 1 + 0.5</span></div>
+      <a class="card" href="#b1"><div class="top"><span class="id">B1</span></div><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div></a>
+      <a class="card" href="#b2"><div class="top"><span class="id">B2</span></div><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div></a>
+      <a class="card" href="#b3"><div class="top"><span class="id">B3</span></div><div class="t">See which checks passed under each answer</div><div class="from">new</div></a>
     </div>
     <div class="epic">
       <div class="epic-head box-h"><h3>Finish a run cleanly</h3><span class="box">Termination · new</span></div>
       <p class="demo">A runaway run stops at its limit, Stop works mid-run, and a stuck run asks for help.</p>
-      <a class="card" href="#c1"><div class="top"><span class="id">C1</span><span class="d">1d</span></div><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div></a>
-      <a class="card" href="#c2"><div class="top"><span class="id">C2</span><span class="d">1.5d</span></div><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div></a>
-      <a class="card" href="#c3"><div class="top"><span class="id">C3</span><span class="d">0.5d</span></div><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div></a>
-      <div class="epic-sum">3 days <span>· 1 + 1.5 + 0.5</span></div>
+      <a class="card" href="#c1"><div class="top"><span class="id">C1</span></div><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div></a>
+      <a class="card" href="#c2"><div class="top"><span class="id">C2</span></div><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div></a>
+      <a class="card" href="#c3"><div class="top"><span class="id">C3</span></div><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div></a>
     </div>
     <div class="epic">
       <div class="epic-head"><h3>Come back to my work</h3><span class="box">Memory · saves</span></div>
       <p class="demo">Reopens a project and gets its model back in Blender, then carries on from an earlier save.</p>
-      <a class="card" href="#d1"><div class="top"><span class="id">D1</span><span class="d">1d</span></div><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
-      <a class="card" href="#d2"><div class="top"><span class="id">D2</span><span class="d">0.5d</span></div><div class="t">Opening a project puts its latest save back in Blender</div><div class="from">from #87</div></a>
-      <a class="card" href="#d3"><div class="top"><span class="id">D3</span><span class="d">1.5d</span></div><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
-      <div class="epic-sum">3 days <span>· 1 + 0.5 + 1.5</span></div>
+      <a class="card" href="#d1"><div class="top"><span class="id">D1</span></div><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d2"><div class="top"><span class="id">D2</span></div><div class="t">Opening a project puts its latest save back in Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d3"><div class="top"><span class="id">D3</span></div><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
     </div>
     <div class="epic">
       <div class="epic-head"><h3>Follow along</h3><span class="box">Progress feed · sessions</span></div>
       <p class="demo">Sees only their own session's steps with failures marked, then switches between named sessions.</p>
-      <a class="card" href="#e1"><div class="top"><span class="id">E1</span><span class="d">1d</span></div><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
-      <a class="card" href="#e2"><div class="top"><span class="id">E2</span><span class="d">1d</span></div><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
-      <a class="card" href="#e3"><div class="top"><span class="id">E3</span><span class="d">1d</span></div><div class="t">Switch between a project's sessions</div><div class="from">replaces bookmarks</div></a>
-      <div class="epic-sum">3 days <span>· 1 + 1 + 1</span></div>
+      <a class="card" href="#e1"><div class="top"><span class="id">E1</span></div><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
+      <a class="card" href="#e2"><div class="top"><span class="id">E2</span></div><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
+      <a class="card" href="#e3"><div class="top"><span class="id">E3</span></div><div class="t">Switch between a project's sessions</div><div class="from">replaces bookmarks</div></a>
     </div>
   </div>
 </section>
@@ -211,7 +184,6 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     <rect x="0" y="10" width="1100" height="76" class="lane"/>
     <rect x="0" y="182" width="1100" height="76" class="lane"/>
     <rect x="0" y="354" width="1100" height="76" class="lane"/>
-    <g class="tx"><text x="210" y="6">day 1</text><text x="500" y="6">days 2–3</text><text x="790" y="6">days 3–5</text></g>
 
     <text x="16" y="44" class="th">Shape it by chat</text><text x="16" y="62" class="tx">owner A</text>
     <text x="16" y="130" class="th">Check what was built</text><text x="16" y="148" class="tx">owner B</text>
@@ -256,7 +228,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     <line x1="300" y1="72" x2="300" y2="110" class="e-a" style="stroke-dasharray:4 4"/>
     <text x="308" y="95" class="ta">shared scene reader</text>
   </svg></div>
-  <figcaption><b>Only three links cross lanes,</b> so each owner can work almost independently. A1 and B1 both read the Blender scene, so they share one helper: whoever starts first writes it and the other reuses it. C3 needs B1's check results, and B3 needs E1's step display. Every lane starts on day 1.</figcaption>
+  <figcaption><b>Only three links cross lanes,</b> so each owner can work almost independently. A1 and B1 both read the Blender scene, so they share one helper: whoever starts first writes it and the other reuses it. C3 needs B1's check results, and B3 needs E1's step display. Every lane can start straight away.</figcaption>
   </figure>
 </section>
 
@@ -370,9 +342,9 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
   <div class="sec-head"><div class="eyebrow">Stories in full</div><h2>Acceptance criteria are the contract</h2></div>
   <p class="muted">Each criterion is tagged with how it's proved, using the methods in AGENTS.md: <code>app</code> is a logged manual Blender run, <code>unit</code> is a test with the scripted model and a recorded scene, and <code>api</code>, <code>db</code>, <code>browser</code>, <code>cli</code> and <code>code</code> are as listed there. Nothing in a test needs a running Blender or a live LLM.</p>
 
-  <div class="epic-block"><h3>Shape it by chat <span class="sub">3 days · Context · Agent loop</span></h3><div class="stories">
+  <div class="epic-block"><h3>Shape it by chat <span class="sub">Context · Agent loop</span></h3><div class="stories">
     <article class="story" id="a1">
-      <div class="meta"><span class="id">A1</span><span>1 day</span><span>from #85</span></div>
+      <div class="meta"><span class="id">A1</span><span>from #85</span></div>
       <h3>Every run starts from the current scene</h3>
       <p class="why">Before each prompt, Corbi reads what's in Blender and gives it to the model, so a follow-up edits what's there instead of building a second copy.</p>
       <p class="today"><b>Today</b> Follow-ups can already work: the whole chat goes back to the model, and it can call <code>get_scene_info</code>. Nothing makes it look first, so it may add a second building instead of editing the first.</p>
@@ -389,7 +361,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Shares</b> the scene reader with B1</p>
     </article>
     <article class="story" id="a2">
-      <div class="meta"><span class="id">A2</span><span>1 day</span><span>new</span></div>
+      <div class="meta"><span class="id">A2</span><span>new</span></div>
       <h3>Refer to each building by name</h3>
       <p class="why">Each building Corbi makes has a readable name, so the architect can say "make the tower taller" and only the tower changes.</p>
       <p class="today"><b>Today</b> <code>get_scene_info</code> already returns object names, but nothing asks the model to name what it builds, so objects get Blender defaults such as <code>Cube.001</code>.</p>
@@ -404,7 +376,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Depends on</b> A1</p>
     </article>
     <article class="story" id="a3">
-      <div class="meta"><span class="id">A3</span><span>1 day</span><span>from #86</span></div>
+      <div class="meta"><span class="id">A3</span><span>from #86</span></div>
       <h3>Talk an idea through without touching Blender</h3>
       <p class="why">An architect can discuss an idea with Corbi before anything changes in Blender, then ask it to build what they agreed.</p>
       <p class="today"><b>Today</b> The model only has no tools when Blender is closed. With Blender open there's no way to talk without it acting, and every run saves a file even when nothing changed.</p>
@@ -419,9 +391,9 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     </article>
   </div></div>
 
-  <div class="epic-block"><h3>Check what was built <span class="sub">3 days · Sensors</span></h3><div class="stories">
+  <div class="epic-block"><h3>Check what was built <span class="sub">Sensors</span></h3><div class="stories">
     <article class="story" id="b1">
-      <div class="meta"><span class="id">B1</span><span>1.5 days</span><span>new</span></div>
+      <div class="meta"><span class="id">B1</span><span>new</span></div>
       <h3>Corbi checks every change it makes and fixes its own mistakes</h3>
       <p class="why">After every change Corbi makes in Blender, it reads the scene back and checks the result. It notices its own mistakes and fixes them before it answers.</p>
       <p class="today"><b>Today</b> A <code>bpy</code> error already comes back to the model as a failed tool result. Code that runs without error but builds the wrong thing is never checked.</p>
@@ -439,7 +411,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Shares</b> the scene reader with A1 · <b>Blocked on</b> check thresholds; the decision on Blender code</p>
     </article>
     <article class="story" id="b2">
-      <div class="meta"><span class="id">B2</span><span>1 day</span><span>new</span></div>
+      <div class="meta"><span class="id">B2</span><span>new</span></div>
       <h3>Answers quote the figures measured in Blender</h3>
       <p class="why">Corbi's answers give the height, footprint and floor area measured from the geometry, not figures the model came up with.</p>
       <p class="today"><b>Today</b> Nothing is measured. Any height or area in an answer is the model's own claim.</p>
@@ -454,7 +426,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Depends on</b> B1 · <b>Blocked on</b> floor-to-floor height</p>
     </article>
     <article class="story" id="b3">
-      <div class="meta"><span class="id">B3</span><span>0.5 day</span><span>new</span></div>
+      <div class="meta"><span class="id">B3</span><span>new</span></div>
       <h3>See which checks passed under each answer</h3>
       <p class="why">The architect sees how the checks went without having to ask.</p>
       <p class="today"><b>Today</b> Nothing about checks is shown, because there aren't any checks yet.</p>
@@ -467,9 +439,9 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     </article>
   </div></div>
 
-  <div class="epic-block"><h3>Finish a run cleanly <span class="sub">3 days · Termination</span></h3><div class="stories">
+  <div class="epic-block"><h3>Finish a run cleanly <span class="sub">Termination</span></h3><div class="stories">
     <article class="story" id="c1">
-      <div class="meta"><span class="id">C1</span><span>1 day</span><span>new</span></div>
+      <div class="meta"><span class="id">C1</span><span>new</span></div>
       <h3>Every run ends within a step and time limit, and says why</h3>
       <p class="why">A run can't loop forever. When it stops early, the architect is told why and loses nothing.</p>
       <p class="today"><b>Today</b> The only cap is LangGraph's default recursion limit of 10,007 steps, which in practice means no limit. There's no time limit, and every run reports <code>completed</code>.</p>
@@ -486,7 +458,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Blocked on</b> limit figures</p>
     </article>
     <article class="story" id="c2">
-      <div class="meta"><span class="id">C2</span><span>1.5 days</span><span>new</span></div>
+      <div class="meta"><span class="id">C2</span><span>new</span></div>
       <h3>Stop a run that is going the wrong way</h3>
       <p class="why">The architect doesn't have to wait for a run they can already see is wrong.</p>
       <p class="today"><b>Today</b> A run can't be interrupted. Closing the tab doesn't stop it: the run carries on on the server.</p>
@@ -501,7 +473,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Depends on</b> C1</p>
     </article>
     <article class="story" id="c3">
-      <div class="meta"><span class="id">C3</span><span>0.5 day</span><span>new</span></div>
+      <div class="meta"><span class="id">C3</span><span>new</span></div>
       <h3>Corbi stops and asks when the same check keeps failing</h3>
       <p class="why">If Corbi can't fix something, it asks the architect what to do instead of using up the step limit.</p>
       <p class="today"><b>Today</b> A run that keeps failing carries on until the model gives up or something errors.</p>
@@ -515,9 +487,9 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     </article>
   </div></div>
 
-  <div class="epic-block"><h3>Come back to my work <span class="sub">3 days · Memory · saves</span></h3><div class="stories">
+  <div class="epic-block"><h3>Come back to my work <span class="sub">Memory · saves</span></h3><div class="stories">
     <article class="story" id="d1">
-      <div class="meta"><span class="id">D1</span><span>1 day</span><span>from #87</span></div>
+      <div class="meta"><span class="id">D1</span><span>from #87</span></div>
       <h3>See a save after every answer that changed Blender</h3>
       <p class="why">Each answer that built something shows its save in the chat, so the architect can see their history and pick a point to go back to.</p>
       <p class="today"><b>Today</b> Every answer already saves a <code>.blend</code> and a <code>models</code> row. The chat doesn't show them, there's no endpoint to list a session's saves, and each save is stamped before its own turn's messages.</p>
@@ -531,7 +503,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       </ol>
     </article>
     <article class="story" id="d2">
-      <div class="meta"><span class="id">D2</span><span>0.5 day</span><span>from #87</span></div>
+      <div class="meta"><span class="id">D2</span><span>from #87</span></div>
       <h3>Opening a project puts its latest save back in Blender</h3>
       <p class="why">The architect carries on where they stopped, with the model they left.</p>
       <p class="today"><b>Today</b> Loading a project brings back its chat but not its model: Blender keeps whatever it already had open.</p>
@@ -546,7 +518,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       <p class="dep"><b>Depends on</b> D1</p>
     </article>
     <article class="story" id="d3">
-      <div class="meta"><span class="id">D3</span><span>1.5 days</span><span>replaces bookmarks</span></div>
+      <div class="meta"><span class="id">D3</span><span>replaces bookmarks</span></div>
       <h3>Carry on from an earlier save in a new session</h3>
       <p class="why">The architect picks an earlier save from the chat and continues from there, and the original session stays as it was.</p>
       <p class="today"><b>Today</b> There's no way to go back. Bookmarks name a session but don't freeze or restore anything.</p>
@@ -565,9 +537,9 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
     </article>
   </div></div>
 
-  <div class="epic-block"><h3>Follow along <span class="sub">3 days · Progress feed · sessions</span></h3><div class="stories">
+  <div class="epic-block"><h3>Follow along <span class="sub">Progress feed · sessions</span></h3><div class="stories">
     <article class="story" id="e1">
-      <div class="meta"><span class="id">E1</span><span>1 day</span><span>from #102</span></div>
+      <div class="meta"><span class="id">E1</span><span>from #102</span></div>
       <h3>See only my session's steps, with failures marked</h3>
       <p class="why">While Corbi works, the architect sees only their own session's steps, and a step that failed is marked as failed.</p>
       <p class="today"><b>Today</b> Steps already show as compact lines, apart from answers. But the feed is one list for the whole app, so every open tab sees every session's steps, and a failed tool call looks the same as one that worked.</p>
@@ -581,7 +553,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       </ol>
     </article>
     <article class="story" id="e2">
-      <div class="meta"><span class="id">E2</span><span>1 day</span><span>new</span></div>
+      <div class="meta"><span class="id">E2</span><span>new</span></div>
       <h3>Sessions name themselves from my first prompt</h3>
       <p class="why">The architect can tell sessions apart without typing names, and can rename one.</p>
       <p class="today"><b>Today</b> Sessions have a <code>name</code> column, but only the bookmark call sets it, so new sessions are unnamed.</p>
@@ -595,7 +567,7 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
       </ol>
     </article>
     <article class="story" id="e3">
-      <div class="meta"><span class="id">E3</span><span>1 day</span><span>replaces bookmarks</span></div>
+      <div class="meta"><span class="id">E3</span><span>replaces bookmarks</span></div>
       <h3>Switch between a project's sessions</h3>
       <p class="why">A project shows its sessions by title, newest first, and the architect opens any of them with its chat.</p>
       <p class="today"><b>Today</b> Loading a project opens only its last-touched session. The API can list bookmarked sessions, but the web app never shows them, so older sessions can't be reached.</p>
