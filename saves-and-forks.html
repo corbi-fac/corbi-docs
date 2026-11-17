@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saves and Forks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: same system as the architecture page; accent = what the proposal adds, muted strike = what it removes. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --ink: #172030; --muted: #5a6577; --line: #c8d0dc; --accent: #0d7f73; --accent-t: #e3f5f2;
+  --chat: #2457c9; --chat-t: #eaf0fd; --file: #c45a12; --file-t: #fdf0e6; --db: #3b7f35; --db-t: #ebf6e9;
+  --cut: #b3364a; --cut-t: #fcebee;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4; --accent-t: #10302d;
+  --chat: #6f9bf5; --chat-t: #16233f; --file: #f0954f; --file-t: #33210f; --db: #7ccb72; --db-t: #172d15;
+  --cut: #f07a8c; --cut-t: #3a1820; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4; --accent-t: #10302d;
+  --chat: #6f9bf5; --chat-t: #16233f; --file: #f0954f; --file-t: #33210f; --db: #7ccb72; --db-t: #172d15;
+  --cut: #f07a8c; --cut-t: #3a1820; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+header { display: grid; gap: 12px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 44px/1.05 var(--display); margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h2 { font: 600 24px/1.2 var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); }
+section { display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 6px; }
+.sec-head .eyebrow { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; }
+.scroll { overflow-x: auto; padding: 16px; }
+figure svg { display: block; width: 100%; height: auto; min-width: 900px; color: var(--ink); }
+figure.narrow svg { min-width: 620px; max-width: 860px; }
+figcaption { border-top: 1px solid var(--line); padding: 12px 16px; font-size: 13.5px; color: var(--muted); }
+figcaption b { color: var(--ink); font-weight: 600; }
+.tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tally div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.tally b { font: 700 34px/1 var(--display); font-variant-numeric: tabular-nums; }
+.tally span { font-size: 13px; color: var(--muted); }
+.tally .zero b { color: var(--accent); }
+.map { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.map div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.map .need { font: 600 14px var(--sans); }
+.map .how { font-size: 14px; color: var(--muted); }
+.ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+.ledger ol { list-style: none; margin: 0; padding: 8px 0; font: 13px/1.5 var(--mono); }
+.ledger li { display: grid; grid-template-columns: 28px 1fr minmax(160px, auto); gap: 12px; padding: 7px 16px; align-items: baseline; }
+.ledger li + li { border-top: 1px solid var(--line); }
+.ledger .s { font-weight: 600; text-align: center; border-radius: 4px; }
+.ledger .add .s { color: var(--accent); background: var(--accent-t); }
+.ledger .mod .s { color: var(--file); background: var(--file-t); }
+.ledger .del .s { color: var(--cut); background: var(--cut-t); }
+.ledger .where { color: var(--muted); font-size: 12px; text-align: right; }
+@media (max-width: 640px) { .ledger li { grid-template-columns: 28px 1fr; } .ledger .where { grid-column: 2; text-align: left; } h1 { font-size: 34px; } }
+
+/* SVG vocabulary */
+.box { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.k-chat { fill: var(--chat-t); stroke: var(--chat); stroke-width: 1.4; }
+.k-file { fill: var(--file-t); stroke: var(--file); stroke-width: 1.6; }
+.k-db { fill: var(--db-t); stroke: var(--db); stroke-width: 1.4; }
+.k-acc { fill: var(--accent-t); stroke: var(--accent); stroke-width: 2; }
+.k-cut { fill: var(--cut-t); stroke: var(--cut); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.k-ink { fill: var(--ink); stroke: var(--ink); }
+.dot-chat { fill: var(--chat); }
+.dot-ghost { fill: var(--muted); fill-opacity: .55; }
+.th { font: 600 13px var(--sans); fill: var(--ink); }
+.tl { font: 500 12px var(--mono); fill: var(--ink); }
+.ts { font: 400 11px var(--mono); fill: var(--muted); }
+.tx { font: 400 10.5px var(--mono); fill: var(--muted); }
+.ta { font: 600 11.5px var(--mono); fill: var(--accent); }
+.tf { font: 600 11px var(--mono); fill: var(--file); }
+.tc { font: 600 11px var(--mono); fill: var(--cut); }
+.tbig { font: 600 15px var(--display); fill: var(--ink); }
+.e { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.e-m { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.e-a { stroke: var(--accent); stroke-width: 2; fill: none; }
+.e-c { stroke: var(--cut); stroke-width: 1.4; fill: none; }
+.d { stroke-dasharray: 5 4; }
+.axis { stroke: var(--line); stroke-width: 2; }
+.mk { fill: var(--ink); } .mk-a { fill: var(--accent); } .mk-m { fill: var(--muted); } .mk-c { fill: var(--cut); }
+.band { fill: var(--accent); fill-opacity: .09; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.strike { stroke: var(--cut); stroke-width: 2.2; }
+</style>
+</head>
+<body>
+<nav style="max-width:1240px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 0;font:500 13px 'IBM Plex Mono',ui-monospace,monospace"><a href="./" style="color:inherit;opacity:.7">← Corbi docs</a></nav>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Corbi · proposal · 17 Nov 2026</div>
+  <h1>Saves and Forks</h1>
+  <p class="lede">Every answered prompt already leaves a saved <code>.blend</code> and a timestamped chat history, so we don't need a bookmarks table. A save is the checkpoint, a timestamp ties it to its conversation, and carrying on from an older save starts a new session.</p>
+  <div class="tally">
+    <div class="zero"><b>0</b><span>new tables</span></div>
+    <div class="zero"><b>0</b><span>new columns</span></div>
+    <div class="zero"><b>0</b><span>migrations</span></div>
+    <div><b>1</b><span>line moved in the harness graph</span></div>
+    <div><b>2</b><span>new endpoints: fork, list saves</span></div>
+  </div>
+</header>
+
+<!-- 1. A save is a checkpoint -->
+<section>
+  <div class="sec-head"><div class="eyebrow">01 · The idea</div><h2>A save is already a checkpoint</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 250" role="img" aria-label="A session over time: each turn writes chat rows and then one saved model. The checkpoint at save m3 is the file m3 plus every chat row with created_at at or before m3's created_at.">
+    <rect x="66" y="58" width="686" height="124" rx="8" class="band"/>
+    <text x="80" y="50" class="ta">checkpoint m3 = file m3 + chats WHERE created_at ≤ m3.created_at</text>
+
+    <line x1="60" y1="96" x2="1070" y2="96" class="axis"/>
+    <line x1="60" y1="150" x2="1070" y2="150" class="axis"/>
+    <text x="1070" y="86" text-anchor="end" class="ts">chats</text>
+    <text x="1070" y="140" text-anchor="end" class="ts">models</text>
+
+    <!-- T1 -->
+    <circle cx="100" cy="96" r="6" class="dot-chat"/><circle cx="125" cy="96" r="6" class="dot-chat"/><circle cx="150" cy="96" r="6" class="dot-chat"/><circle cx="175" cy="96" r="6" class="dot-chat"/>
+    <rect x="248" y="138" width="24" height="24" rx="4" class="k-file"/><text x="260" y="182" text-anchor="middle" class="tf">m1</text>
+    <!-- T2 -->
+    <circle cx="340" cy="96" r="6" class="dot-chat"/><circle cx="365" cy="96" r="6" class="dot-chat"/><circle cx="390" cy="96" r="6" class="dot-chat"/>
+    <rect x="488" y="138" width="24" height="24" rx="4" class="k-file"/><text x="500" y="182" text-anchor="middle" class="tf">m2</text>
+    <!-- T3 -->
+    <circle cx="580" cy="96" r="6" class="dot-chat"/><circle cx="605" cy="96" r="6" class="dot-chat"/><circle cx="630" cy="96" r="6" class="dot-chat"/><circle cx="655" cy="96" r="6" class="dot-chat"/>
+    <rect x="728" y="138" width="24" height="24" rx="4" class="k-file" style="stroke-width:2.6"/><text x="740" y="182" text-anchor="middle" class="tf">m3</text>
+    <line x1="752" y1="66" x2="752" y2="176" class="e-a d"/>
+    <!-- T4 -->
+    <circle cx="820" cy="96" r="6" class="dot-ghost"/><circle cx="845" cy="96" r="6" class="dot-ghost"/><circle cx="870" cy="96" r="6" class="dot-ghost"/>
+    <rect x="968" y="138" width="24" height="24" rx="4" class="k-file" style="opacity:.55"/><text x="980" y="182" text-anchor="middle" class="tx">m4</text>
+
+    <g class="tx">
+      <text x="180" y="226" text-anchor="middle">turn 1</text><text x="420" y="226" text-anchor="middle">turn 2</text>
+      <text x="660" y="226" text-anchor="middle">turn 3</text><text x="900" y="226" text-anchor="middle">turn 4</text>
+    </g>
+    <line x1="300" y1="200" x2="300" y2="232" class="e-m d"/><line x1="540" y1="200" x2="540" y2="232" class="e-m d"/><line x1="780" y1="200" x2="780" y2="232" class="e-m d"/>
+    <text x="60" y="244" class="tx">one session · time →</text>
+  </svg></div>
+  <figcaption><b>Nothing new is stored.</b> The <code>save</code> node already writes one <code>models</code> row per answered prompt, and <code>chats</code> already carries <code>created_at</code>. Comparing two timestamps gives a checkpoint, with no join table and no copy of anything. Chats come back in the order they were written, so a cut always falls at the end of a turn and never splits a tool call from its result.</figcaption>
+  </figure>
+</section>
+
+<!-- 2. The one ordering fix -->
+<section>
+  <div class="sec-head"><div class="eyebrow">02 · The one code change it needs</div><h2>Write the chat rows before the save</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 300" role="img" aria-label="Today the graph saves the model before the turn's chats are persisted, so the model's timestamp precedes its own messages. Moving persist before save makes every message of a turn come at or before its save.">
+    <defs>
+      <marker id="f-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+    </defs>
+    <text x="20" y="28" class="tc">TODAY</text>
+    <rect x="20" y="44" width="100" height="40" rx="6" class="box"/><text x="70" y="69" text-anchor="middle" class="tl">call_llm</text>
+    <line x1="120" y1="64" x2="148" y2="64" class="e" marker-end="url(#f-a)"/>
+    <rect x="150" y="44" width="90" height="40" rx="6" class="k-file"/><text x="195" y="69" text-anchor="middle" class="tl">save</text>
+    <line x1="240" y1="64" x2="268" y2="64" class="e" marker-end="url(#f-a)"/>
+    <rect x="270" y="44" width="100" height="40" rx="6" class="box"/><text x="320" y="69" text-anchor="middle" class="tl">feedback</text>
+    <line x1="370" y1="64" x2="398" y2="64" class="e" marker-end="url(#f-a)"/>
+    <circle cx="410" cy="64" r="10" class="k-ink"/>
+    <line x1="420" y1="64" x2="448" y2="64" class="e d" marker-end="url(#f-a)"/>
+    <rect x="450" y="44" width="110" height="40" rx="6" class="k-chat"/><text x="505" y="69" text-anchor="middle" class="tl">persist</text>
+
+    <line x1="640" y1="64" x2="1080" y2="64" class="axis"/>
+    <rect x="680" y="52" width="24" height="24" rx="4" class="k-file"/><text x="692" y="100" text-anchor="middle" class="tf">m3</text>
+    <circle cx="790" cy="64" r="6" class="dot-chat"/><circle cx="815" cy="64" r="6" class="dot-chat"/><circle cx="840" cy="64" r="6" class="dot-chat"/><circle cx="865" cy="64" r="6" class="dot-chat"/>
+    <text x="828" y="100" text-anchor="middle" class="tx">turn 3's messages</text>
+    <text x="1080" y="126" text-anchor="end" class="tc">m3 is stamped before its own turn: "≤ m3" misses turn 3</text>
+
+    <line x1="20" y1="150" x2="1080" y2="150" class="e-m d" style="stroke-dasharray:2 5"/>
+
+    <text x="20" y="186" class="ta">PROPOSED</text>
+    <rect x="20" y="202" width="100" height="40" rx="6" class="box"/><text x="70" y="227" text-anchor="middle" class="tl">call_llm</text>
+    <line x1="120" y1="222" x2="148" y2="222" class="e" marker-end="url(#f-a)"/>
+    <rect x="150" y="202" width="110" height="40" rx="6" class="k-acc"/><text x="205" y="227" text-anchor="middle" class="tl">persist</text>
+    <line x1="260" y1="222" x2="288" y2="222" class="e" marker-end="url(#f-a)"/>
+    <rect x="290" y="202" width="90" height="40" rx="6" class="k-file"/><text x="335" y="227" text-anchor="middle" class="tl">save</text>
+    <line x1="380" y1="222" x2="408" y2="222" class="e" marker-end="url(#f-a)"/>
+    <rect x="410" y="202" width="100" height="40" rx="6" class="box"/><text x="460" y="227" text-anchor="middle" class="tl">feedback</text>
+    <line x1="510" y1="222" x2="538" y2="222" class="e" marker-end="url(#f-a)"/>
+    <circle cx="550" cy="222" r="10" class="k-ink"/>
+
+    <line x1="640" y1="222" x2="1080" y2="222" class="axis"/>
+    <circle cx="700" cy="222" r="6" class="dot-chat"/><circle cx="725" cy="222" r="6" class="dot-chat"/><circle cx="750" cy="222" r="6" class="dot-chat"/><circle cx="775" cy="222" r="6" class="dot-chat"/>
+    <text x="738" y="258" text-anchor="middle" class="tx">turn 3's messages</text>
+    <rect x="868" y="210" width="24" height="24" rx="4" class="k-file" style="stroke-width:2.6"/><text x="880" y="258" text-anchor="middle" class="tf">m3</text>
+    <text x="1080" y="286" text-anchor="end" class="ta">every message of a turn is ≤ its save</text>
+  </svg></div>
+  <figcaption>Turn <code>persist_new_messages</code> from a step after the graph into a node between <code>call_llm</code> and <code>save</code>. Timestamps are whole seconds, so a turn's last message and its save can tie, and <code>≤</code> covers that. The next turn's messages are only written after another LLM round, so they can't fall into the same second.</figcaption>
+  </figure>
+</section>
+
+<!-- 3. Fork -->
+<section>
+  <div class="sec-head"><div class="eyebrow">03 · Carrying on from an old save</div><h2>Carrying on from an older save forks the session</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 360" role="img" aria-label="Session 12 has saves m1 to m5. The user picks m3. A fork creates session 31 in the same project, copies the chats up to m3 and the m3 file, opens it in Blender, and new turns save m4 and m5 in session 31. Session 12 is untouched.">
+    <defs>
+      <marker id="k-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <text x="20" y="44" class="th">session 12</text>
+    <text x="20" y="60" class="tx">untouched</text>
+    <line x1="120" y1="50" x2="780" y2="50" class="axis"/>
+    <g>
+      <rect x="188" y="38" width="24" height="24" rx="4" class="k-file"/><text x="200" y="82" text-anchor="middle" class="tf">m1</text>
+      <rect x="318" y="38" width="24" height="24" rx="4" class="k-file"/><text x="330" y="82" text-anchor="middle" class="tf">m2</text>
+      <rect x="448" y="38" width="24" height="24" rx="4" class="k-file" style="stroke-width:3"/><text x="460" y="82" text-anchor="middle" class="tf">m3</text>
+      <rect x="578" y="38" width="24" height="24" rx="4" class="k-file"/><text x="590" y="82" text-anchor="middle" class="tf">m4</text>
+      <rect x="708" y="38" width="24" height="24" rx="4" class="k-file"/><text x="720" y="82" text-anchor="middle" class="tf">m5</text>
+      <circle cx="145" cy="50" r="4" class="dot-chat"/><circle cx="160" cy="50" r="4" class="dot-chat"/><circle cx="270" cy="50" r="4" class="dot-chat"/><circle cx="290" cy="50" r="4" class="dot-chat"/>
+      <circle cx="400" cy="50" r="4" class="dot-chat"/><circle cx="420" cy="50" r="4" class="dot-chat"/><circle cx="530" cy="50" r="4" class="dot-chat"/><circle cx="550" cy="50" r="4" class="dot-chat"/>
+      <circle cx="660" cy="50" r="4" class="dot-chat"/><circle cx="680" cy="50" r="4" class="dot-chat"/>
+    </g>
+
+    <path d="M460 66 V150 Q460 170 480 170 H520" class="e-a" marker-end="url(#k-a)"/>
+    <rect x="524" y="150" width="250" height="40" rx="6" class="k-acc"/>
+    <text x="536" y="168" class="ta">POST /sessions/12/fork</text>
+    <text x="536" y="183" class="tx">{ "model_id": m3 }</text>
+
+    <text x="20" y="274" class="th">session 31</text>
+    <text x="20" y="290" class="tx">same project</text>
+    <rect x="120" y="248" width="352" height="44" rx="6" class="box" style="stroke-dasharray:4 4"/>
+    <text x="130" y="312" class="tx">copied in one transaction</text>
+    <line x1="120" y1="270" x2="1060" y2="270" class="axis"/>
+    <circle cx="145" cy="270" r="4" class="dot-ghost"/><circle cx="160" cy="270" r="4" class="dot-ghost"/><circle cx="270" cy="270" r="4" class="dot-ghost"/><circle cx="290" cy="270" r="4" class="dot-ghost"/>
+    <circle cx="400" cy="270" r="4" class="dot-ghost"/><circle cx="420" cy="270" r="4" class="dot-ghost"/>
+    <rect x="448" y="258" width="24" height="24" rx="4" class="k-file" style="stroke-width:3"/><text x="460" y="240" text-anchor="middle" class="tf">m3 copy</text>
+    <path d="M560 190 L482 254" class="e-a d" marker-end="url(#k-a)"/>
+    <text x="540" y="230" class="tx">opens m3 in Blender</text>
+    <circle cx="560" cy="270" r="4" class="dot-chat"/><circle cx="580" cy="270" r="4" class="dot-chat"/><circle cx="690" cy="270" r="4" class="dot-chat"/><circle cx="710" cy="270" r="4" class="dot-chat"/>
+    <rect x="628" y="258" width="24" height="24" rx="4" class="k-acc"/><text x="640" y="302" text-anchor="middle" class="ta">m4</text>
+    <rect x="758" y="258" width="24" height="24" rx="4" class="k-acc"/><text x="770" y="302" text-anchor="middle" class="ta">m5</text>
+    <text x="1060" y="300" text-anchor="end" class="ts">new turns, as normal →</text>
+
+    <rect x="820" y="30" width="260" height="170" rx="8" class="box"/>
+    <text x="836" y="54" class="th">The fork does four things</text>
+    <text x="836" y="80" class="tl">1  insert sessions row</text>
+    <text x="836" y="102" class="tl">2  copy chats ≤ m3.created_at</text>
+    <text x="836" y="124" class="tl">3  copy m3 file + models row</text>
+    <text x="836" y="140" class="tx">   → models/31/…</text>
+    <text x="836" y="162" class="tl">4  open the file in Blender</text>
+    <text x="836" y="186" class="tx">steps 1–3: one DB transaction</text>
+  </svg></div>
+  <figcaption><b>The harness doesn't change.</b> <code>gather_info</code> already rebuilds the agent's context from the session's <code>chats</code> on every run, so the fork carries the whole conversation without extra agent state. Session 12 keeps every save, and its latest save is still what loads by default.</figcaption>
+  </figure>
+
+  <figure class="narrow"><div class="scroll">
+  <svg viewBox="0 0 860 150" role="img" aria-label="When the user picks a save: if it is the session's latest, keep going in the same session; if it is older, fork.">
+    <defs><marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker></defs>
+    <rect x="20" y="52" width="150" height="46" rx="8" class="k-file"/><text x="95" y="80" text-anchor="middle" class="tl">user picks a save</text>
+    <line x1="170" y1="75" x2="218" y2="75" class="e" marker-end="url(#r-a)"/>
+    <path d="M320 25 L420 75 L320 125 L220 75 Z" class="box" style="stroke:var(--ink)"/>
+    <text x="320" y="72" text-anchor="middle" class="tl">the session's</text><text x="320" y="88" text-anchor="middle" class="tl">latest save?</text>
+    <path d="M420 75 H460 V34 H498" class="e" marker-end="url(#r-a)"/><text x="440" y="28" class="tx">yes</text>
+    <path d="M420 75 H460 V116 H498" class="e" marker-end="url(#r-a)"/><text x="440" y="138" class="tx">no</text>
+    <rect x="500" y="12" width="340" height="44" rx="6" class="k-chat"/><text x="514" y="39" class="tl">keep chatting in the same session</text>
+    <rect x="500" y="94" width="340" height="44" rx="6" class="k-acc"/><text x="514" y="121" class="tl">fork, then chat in the new session</text>
+  </svg></div>
+  <figcaption>This is the only rule the UI needs, and a session's history never has to branch.</figcaption>
+  </figure>
+</section>
+
+<!-- 4. Schema: what we are not adding -->
+<section>
+  <div class="sec-head"><div class="eyebrow">04 · Schema</div><h2>The bookmarks table we don't need</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 330" role="img" aria-label="Left: a bookmarks table would add project_id, session_id, model_id and a unique name, and repeat facts already implied by models and sessions. Right: the proposal keeps the four existing tables unchanged; a checkpoint is a models row plus a timestamp comparison.">
+    <defs>
+      <marker id="g-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-m"/></marker>
+      <marker id="g-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-c"/></marker>
+      <marker id="g-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <text x="20" y="26" class="tc">CONSIDERED · ADR-009 alternative</text>
+    <rect x="20" y="44" width="150" height="56" rx="6" class="k-db"/><text x="32" y="66" class="th">sessions</text><text x="32" y="86" class="tx">id · project_id</text>
+    <rect x="20" y="130" width="150" height="56" rx="6" class="k-db"/><text x="32" y="152" class="th">models</text><text x="32" y="172" class="tx">id · session_id</text>
+    <rect x="260" y="60" width="230" height="150" rx="6" class="k-cut"/>
+    <text x="274" y="82" class="th">bookmarks</text>
+    <text x="274" y="106" class="tl">id</text>
+    <text x="274" y="124" class="tl">project_id</text><text x="476" y="124" text-anchor="end" class="tc">repeats</text>
+    <text x="274" y="142" class="tl">session_id</text><text x="476" y="142" text-anchor="end" class="tc">repeats</text>
+    <text x="274" y="160" class="tl">model_id</text>
+    <text x="274" y="178" class="tl">name</text>
+    <text x="274" y="198" class="tx">UNIQUE (project_id, name)</text>
+    <path d="M260 142 H215 V86 H172" class="e-c" marker-end="url(#g-c)"/>
+    <path d="M260 160 H215 V172 H172" class="e-c" marker-end="url(#g-c)"/>
+    <text x="20" y="232" class="tx">model_id already says which session,</text>
+    <text x="20" y="248" class="tx">and that session says which project.</text>
+    <text x="20" y="264" class="tx">Storing them again needs checks</text>
+    <text x="20" y="280" class="tx">to keep the three in agreement.</text>
+    <line x1="252" y1="52" x2="498" y2="218" class="strike"/>
+
+    <line x1="550" y1="20" x2="550" y2="310" class="e-m d" style="stroke-dasharray:2 5"/>
+
+    <text x="590" y="26" class="ta">PROPOSED · unchanged</text>
+    <rect x="590" y="44" width="130" height="50" rx="6" class="k-db"/><text x="602" y="66" class="th">projects</text>
+    <rect x="760" y="44" width="150" height="50" rx="6" class="k-db"/><text x="772" y="66" class="th">sessions</text><text x="772" y="84" class="ta" style="font-size:10.5px">name = auto title</text>
+    <rect x="950" y="20" width="130" height="50" rx="6" class="k-db"/><text x="962" y="42" class="th">chats</text><text x="962" y="60" class="tx">created_at</text>
+    <rect x="950" y="96" width="130" height="50" rx="6" class="k-db"/><text x="962" y="118" class="th">models</text><text x="962" y="136" class="tx">created_at</text>
+    <line x1="720" y1="69" x2="758" y2="69" class="e-m" marker-end="url(#g-a)"/>
+    <path d="M910 60 H930 V45 H948" class="e-m" marker-end="url(#g-a)"/>
+    <path d="M910 80 H930 V121 H948" class="e-m" marker-end="url(#g-a)"/>
+    <rect x="590" y="186" width="490" height="96" rx="8" class="k-acc"/>
+    <text x="606" y="210" class="th">checkpoint = one models row</text>
+    <text x="606" y="234" class="tl">SELECT * FROM chats</text>
+    <text x="606" y="252" class="tl">WHERE session_id = :s</text>
+    <text x="606" y="270" class="tl">  AND created_at &lt;= :model_created_at</text>
+    <path d="M1015 146 V184" class="e-a d" marker-end="url(#g-h)"/>
+  </svg></div>
+  <figcaption>The table would record a link we can already derive: a <code>models</code> row belongs to one session, and the session belongs to one project. ADR-009's lighter option, a name on the session, becomes the session's title instead of a bookmark flag.</figcaption>
+  </figure>
+</section>
+
+<!-- 5. Copy vs pointer -->
+<section>
+  <div class="sec-head"><div class="eyebrow">05 · Why the fork copies</div><h2>Copy the history instead of pointing to the parent</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 270" role="img" aria-label="Pointer option: session 31 stores parent_session_id and fork_model_id, reads must stitch the parent's chats and recurse for forks of forks, and deleting the parent breaks the fork. Copy option: session 31 owns its rows and file; loading, running and deleting stay as they are.">
+    <defs>
+      <marker id="c-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-c"/></marker>
+    </defs>
+    <text x="20" y="26" class="tc">POINTER · rejected</text>
+    <rect x="20" y="44" width="180" height="70" rx="6" class="k-db"/><text x="34" y="66" class="th">session 12</text><text x="34" y="86" class="tx">chats · m1…m5</text>
+    <rect x="20" y="160" width="180" height="84" rx="6" class="k-db"/><text x="34" y="182" class="th">session 31</text>
+    <text x="34" y="202" class="tl">parent_session_id</text><text x="34" y="220" class="tl">fork_model_id</text><text x="34" y="236" class="tx">+ its own chats</text>
+    <path d="M110 160 V116" class="e-c" marker-end="url(#c-c)"/>
+    <text x="230" y="140" class="tc">reading 31 = 12's chats ≤ m3 + 31's chats</text>
+    <text x="230" y="160" class="tx">fork of a fork: walk the chain</text>
+    <text x="230" y="180" class="tx">gather_info, load, list all change</text>
+    <text x="230" y="200" class="tc">delete 12 → cascade deletes 31's past</text>
+    <text x="230" y="220" class="tx">or blocks the delete; m3 file goes too</text>
+    <text x="230" y="240" class="tx">+2 columns, +1 self-referencing FK</text>
+
+    <line x1="550" y1="20" x2="550" y2="256" class="e-m d" style="stroke-dasharray:2 5"/>
+
+    <text x="590" y="26" class="ta">COPY · proposed</text>
+    <rect x="590" y="44" width="180" height="70" rx="6" class="k-db"/><text x="604" y="66" class="th">session 12</text><text x="604" y="86" class="tx">chats · m1…m5</text>
+    <rect x="590" y="160" width="180" height="84" rx="6" class="k-acc"/><text x="604" y="182" class="th">session 31</text>
+    <text x="604" y="202" class="tl">its own chats</text><text x="604" y="220" class="tl">its own m3 copy</text><text x="604" y="236" class="tx">no link back</text>
+    <text x="800" y="140" class="ta">reading 31 = 31's chats</text>
+    <text x="800" y="160" class="tx">same query as every session</text>
+    <text x="800" y="180" class="tx">gather_info, load, list unchanged</text>
+    <text x="800" y="200" class="ta">delete 12 → 31 unaffected</text>
+    <text x="800" y="220" class="tx">existing cascade + folder removal</text>
+    <text x="800" y="240" class="ta">+0 columns</text>
+  </svg></div>
+  <figcaption>The copied rows aren't denormalised data. Nothing in the fork derives from the parent or has to stay in sync with it: it is the new session's own history, written once and never edited, like any other chat row. The <code>.blend</code> has to be copied either way, because files live in per-session folders that are removed with their session.</figcaption>
+  </figure>
+</section>
+
+<!-- 6. Auto title -->
+<section>
+  <div class="sec-head"><div class="eyebrow">06 · Naming</div><h2>Sessions name themselves</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1100 200" role="img" aria-label="On a session's first prompt, a small title call runs alongside the harness run and writes sessions.name only if it is still empty, so a name the user already typed wins.">
+    <defs><marker id="n-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+      <marker id="n-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker></defs>
+    <rect x="20" y="70" width="150" height="56" rx="8" class="k-chat"/><text x="95" y="94" text-anchor="middle" class="tl">first prompt</text><text x="95" y="112" text-anchor="middle" class="tx">of a session</text>
+    <path d="M170 98 H200 V50 H228" class="e" marker-end="url(#n-k)"/>
+    <path d="M170 98 H200 V150 H228" class="e-a" marker-end="url(#n-a)"/>
+    <rect x="230" y="30" width="780" height="40" rx="6" class="box"/><text x="244" y="55" class="tl">harness run: tools, Blender, save …</text><text x="996" y="55" text-anchor="end" class="tx">tens of seconds</text>
+    <rect x="230" y="130" width="230" height="40" rx="6" class="k-acc"/><text x="244" y="155" class="tl">title call · fast model</text>
+    <line x1="460" y1="150" x2="498" y2="150" class="e-a" marker-end="url(#n-a)"/>
+    <rect x="500" y="130" width="510" height="40" rx="6" class="k-db"/>
+    <text x="514" y="155" class="tl">UPDATE sessions SET name = :title WHERE id = :s AND name IS NULL</text>
+    <text x="230" y="194" class="tx">its own DB session · failure is logged and leaves the name empty · provider comes from the model factory</text>
+  </svg></div>
+  <figcaption>Renaming stays a plain update of <code>sessions.name</code>. The <code>name IS NULL</code> guard means a name the user typed while the title was being generated isn't overwritten.</figcaption>
+  </figure>
+</section>
+
+<!-- 7. Mapping -->
+<section>
+  <div class="sec-head"><div class="eyebrow">07 · Coverage</div><h2>What each bookmark need becomes</h2></div>
+  <div class="map">
+    <div><span class="need">Name a sitting</span><span class="how">An auto title from the first prompt, which the user can rename.</span></div>
+    <div><span class="need">Find a sitting again</span><span class="how">The project's sessions list, newest first.</span></div>
+    <div><span class="need">Go back to a point</span><span class="how">Pick a save. Show its file and the chats up to its timestamp.</span></div>
+    <div><span class="need">Carry on from that point</span><span class="how">From the latest save, keep going. From an older save, fork.</span></div>
+  </div>
+</section>
+
+<!-- 8. Ledger -->
+<section>
+  <div class="sec-head"><div class="eyebrow">08 · The whole change</div><h2>The full list of changes</h2></div>
+  <div class="ledger"><ol>
+    <li class="mod"><span class="s">~</span><span>move chat persistence into a graph node before <code>save</code></span><span class="where">harness_state_machine.py</span></li>
+    <li class="add"><span class="s">+</span><span><code>GET /sessions/{id}/models</code>: the session's saves, oldest first</span><span class="where">routes/sessions.py</span></li>
+    <li class="add"><span class="s">+</span><span><code>POST /sessions/{id}/fork {model_id}</code>: new session, copy chats ≤, copy file</span><span class="where">controllers/session.py</span></li>
+    <li class="add"><span class="s">+</span><span><code>open_file(path)</code> in the Blender bridge, called by the API and not given to the LLM as a tool</span><span class="where">mcp/blender_server.py</span></li>
+    <li class="add"><span class="s">+</span><span>title call on a session's first prompt</span><span class="where">services/</span></li>
+    <li class="mod"><span class="s">~</span><span><code>PUT /sessions/{id}/bookmark</code> becomes a rename, and <code>GET …/bookmarks</code> becomes <code>GET /projects/{id}/sessions</code></span><span class="where">routes · contract</span></li>
+    <li class="del"><span class="s">−</span><span>ADR-009 withdrawn (still Proposed), replaced by a short ADR: saves are checkpoints, and carrying on from an older one forks</span><span class="where">docs/adr</span></li>
+    <li class="mod"><span class="s">~</span><span><code>sessions.name</code> described as the title in DATABASE.md §3e, with no column change</span><span class="where">docs/reference</span></li>
+  </ol></div>
+</section>
+</div>
+
+</body>
+</html>
