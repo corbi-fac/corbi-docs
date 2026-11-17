@@ -108,7 +108,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
 <header>
   <div class="eyebrow">Corbi · Checked Builds · 17 → 24 Nov 2026</div>
   <h1>Week Work Plan</h1>
-  <p class="lede">By Tuesday 24 November, Corbi checks what it builds in Blender, gives a reason for how every run ended, and lets you reopen any answer or carry on from it. Five people each own one epic of three user stories.</p>
+  <p class="lede">By Tuesday 24 November, Corbi checks what it builds in Blender, gives a reason for how every run ended, keeps each session in its own Blender file, and lets you run several sessions in a project and carry on from any answer. Five people each own one epic of three user stories.</p>
 </header>
 
 <!-- EPICS -->
@@ -116,10 +116,10 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
   <h2>Five epics, three stories each</h2>
   <div class="matrix">
     <div class="epic">
-      <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Agent loop</span></div>
+      <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Guides</span></div>
       <a class="card" href="#a1"><span class="id">A1</span><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
       <a class="card" href="#a2"><span class="id">A2</span><div class="t">Refer to each building by name</div><div class="from">new</div></a>
-      <a class="card" href="#a3"><span class="id">A3</span><div class="t">Talk an idea through without touching Blender</div><div class="from">from #86</div></a>
+      <a class="card" href="#a3"><span class="id">A3</span><div class="t">Big builds go in small steps that are safe to repeat</div><div class="from">UAT</div></a>
     </div>
     <div class="epic">
       <div class="epic-head box-h"><h3>Check what was built</h3><span class="box">Sensors · new</span></div>
@@ -136,14 +136,14 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     <div class="epic">
       <div class="epic-head"><h3>Come back to my work</h3><span class="box">Memory · saves</span></div>
       <a class="card" href="#d1"><span class="id">D1</span><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
-      <a class="card" href="#d2"><span class="id">D2</span><div class="t">Opening a project puts its latest save back in Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d2"><span class="id">D2</span><div class="t">Blender always shows this session's own file</div><div class="from">from #87, UAT</div></a>
       <a class="card" href="#d3"><span class="id">D3</span><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
     </div>
     <div class="epic">
       <div class="epic-head"><h3>Follow along</h3><span class="box">Progress feed · sessions</span></div>
       <a class="card" href="#e1"><span class="id">E1</span><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
-      <a class="card" href="#e2"><span class="id">E2</span><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
-      <a class="card" href="#e3"><span class="id">E3</span><div class="t">Switch between a project's sessions</div><div class="from">replaces bookmarks</div></a>
+      <a class="card" href="#e2"><span class="id">E2</span><div class="t">Run several sessions in a project, in a wider workspace</div><div class="from">UAT · replaces bookmarks</div></a>
+      <a class="card" href="#e3"><span class="id">E3</span><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
     </div>
   </div>
 </section>
@@ -165,11 +165,11 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
 
     <!-- lane A -->
     <text x="16" y="38" class="tE">Shape it by chat</text>
-    <text x="16" y="60" class="ts">edit by name, discuss first</text>
-    <text x="16" y="80" class="tx">Context · Agent loop</text>
+    <text x="16" y="60" class="ts">edit by name, build safely</text>
+    <text x="16" y="80" class="tx">Context · Guides</text>
     <a class="st" href="#a1"><rect x="270" y="14" width="290" height="80" rx="8" class="k-h"/><text x="286" y="38" class="tid">A1</text><text x="286" y="60" class="tB">Every run starts from</text><text x="286" y="78" class="tB">the current scene</text></a>
     <a class="st" href="#a2"><rect x="590" y="14" width="290" height="80" rx="8" class="k-h"/><text x="606" y="38" class="tid">A2</text><text x="606" y="60" class="tB">Refer to each building</text><text x="606" y="78" class="tB">by name</text></a>
-    <a class="st" href="#a3"><rect x="900" y="14" width="290" height="80" rx="8" class="k-h"/><text x="916" y="38" class="tid">A3</text><text x="916" y="60" class="tB">Talk an idea through</text><text x="916" y="78" class="tB">without touching Blender</text></a>
+    <a class="st" href="#a3"><rect x="900" y="14" width="290" height="80" rx="8" class="k-h"/><text x="916" y="38" class="tid">A3</text><text x="916" y="60" class="tB">Big builds go in small steps</text><text x="916" y="78" class="tB">that are safe to repeat</text></a>
     <line x1="560" y1="54" x2="588" y2="54" class="e" marker-end="url(#p-a)"/>
 
     <!-- lane B -->
@@ -197,19 +197,20 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     <text x="16" y="384" class="ts">reopen, go back, carry on</text>
     <text x="16" y="404" class="tx">Memory · saves</text>
     <a class="st" href="#d1"><rect x="270" y="338" width="290" height="80" rx="8" class="k-plus"/><text x="286" y="362" class="tid">D1</text><text x="286" y="384" class="tB">See a save after every answer</text><text x="286" y="402" class="tB">that changed Blender</text></a>
-    <a class="st" href="#d2"><rect x="590" y="338" width="290" height="80" rx="8" class="k-plus"/><text x="606" y="362" class="tid">D2</text><text x="606" y="384" class="tB">Opening a project puts its</text><text x="606" y="402" class="tB">latest save back in Blender</text></a>
+    <a class="st" href="#d2"><rect x="590" y="338" width="290" height="80" rx="8" class="k-plus"/><text x="606" y="362" class="tid">D2</text><text x="606" y="384" class="tB">Blender always shows this</text><text x="606" y="402" class="tB">session's own file</text></a>
     <a class="st" href="#d3"><rect x="900" y="338" width="290" height="80" rx="8" class="k-plus"/><text x="916" y="362" class="tid">D3</text><text x="916" y="384" class="tB">Carry on from an earlier save</text><text x="916" y="402" class="tB">in a new session</text></a>
     <line x1="560" y1="378" x2="588" y2="378" class="e" marker-end="url(#p-a)"/>
     <line x1="880" y1="378" x2="898" y2="378" class="e" marker-end="url(#p-a)"/>
 
     <!-- lane E -->
     <text x="16" y="470" class="tE">Follow along</text>
-    <text x="16" y="492" class="ts">my steps, named sessions</text>
+    <text x="16" y="492" class="ts">my steps, many sessions</text>
     <text x="16" y="512" class="tx">Progress feed · sessions</text>
     <a class="st" href="#e1"><rect x="270" y="446" width="290" height="80" rx="8" class="k-plus"/><text x="286" y="470" class="tid">E1</text><text x="286" y="492" class="tB">See only my session's steps,</text><text x="286" y="510" class="tB">with failures marked</text></a>
-    <a class="st" href="#e2"><rect x="590" y="446" width="290" height="80" rx="8" class="k-plus"/><text x="606" y="470" class="tid">E2</text><text x="606" y="492" class="tB">Sessions name themselves</text><text x="606" y="510" class="tB">from my first prompt</text></a>
-    <a class="st" href="#e3"><rect x="900" y="446" width="290" height="80" rx="8" class="k-plus"/><text x="916" y="470" class="tid">E3</text><text x="916" y="492" class="tB">Switch between a project's</text><text x="916" y="510" class="tB">sessions</text></a>
-    <line x1="880" y1="486" x2="898" y2="486" class="e" marker-end="url(#p-a)"/>
+    <a class="st" href="#e2"><rect x="590" y="446" width="290" height="80" rx="8" class="k-plus"/><text x="606" y="470" class="tid">E2</text><text x="606" y="492" class="tB">Run several sessions in a project,</text><text x="606" y="510" class="tB">in a wider workspace</text></a>
+    <a class="st" href="#e3"><rect x="900" y="446" width="290" height="80" rx="8" class="k-plus"/><text x="916" y="470" class="tid">E3</text><text x="916" y="492" class="tB">Sessions name themselves</text><text x="916" y="510" class="tB">from my first prompt</text></a>
+    <line x1="735" y1="418" x2="735" y2="444" class="e-a" marker-end="url(#p-h)"/>
+    <text x="744" y="436" class="ta">D2 → E2</text>
 
     <!-- cross-lane -->
     <line x1="415" y1="94" x2="415" y2="122" class="e-a" style="stroke-dasharray:4 4"/>
@@ -219,7 +220,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     <path d="M415 446 V432 H1196 V162 H1192" class="e-a" style="stroke-dasharray:6 4" marker-end="url(#p-h)"/>
     <text x="1186" y="426" text-anchor="end" class="ta">E1 → B3</text>
   </svg></div>
-  <figcaption>Each person works along one row. An arrow means the story it points to needs the one before it. Only three links cross rows: A1 and B1 share one scene reader, C3 uses B1's check results, and B3 shows its results through E1's step display. Select a story to read it in full.</figcaption>
+  <figcaption>Each person works along one row. An arrow means the story it points to needs the one before it. Only four links cross rows: A1 and B1 share one scene reader, C3 uses B1's check results, B3 shows its results through E1's step display, and E2's New session button gets its empty Blender file from D2. Select a story to read it in full.</figcaption>
   </figure>
 </section>
 
@@ -261,7 +262,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     <rect x="330" y="280" width="180" height="80" rx="10" class="k-h"/>
     <text x="420" y="306" text-anchor="middle" class="th">Tools</text><text x="420" y="324" text-anchor="middle" class="tx">Blender, via MCP</text>
     <rect x="530" y="280" width="180" height="80" rx="10" class="k-h"/>
-    <text x="620" y="306" text-anchor="middle" class="th">Agent loop ↻</text><text x="620" y="324" text-anchor="middle" class="tx">tools off in discuss mode</text>
+    <text x="620" y="306" text-anchor="middle" class="th">Agent loop ↻</text><text x="620" y="324" text-anchor="middle" class="tx">LangGraph StateGraph</text>
     <rect x="730" y="280" width="180" height="80" rx="10" class="k-h"/>
     <text x="820" y="304" text-anchor="middle" class="th">Context</text><text x="820" y="320" text-anchor="middle" class="tx">+ named scene summary</text>
     <text x="820" y="334" text-anchor="middle" class="tx">+ check reports</text>
@@ -279,7 +280,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     <rect x="603" y="470" width="34" height="14" rx="3" class="chip-a"/><text x="620" y="481" text-anchor="middle" class="chip-t">C2</text>
     <rect x="643" y="470" width="34" height="14" rx="3" class="chip-a"/><text x="660" y="481" text-anchor="middle" class="chip-t">C3</text>
     <rect x="730" y="396" width="180" height="80" rx="10" class="k-h"/>
-    <text x="820" y="422" text-anchor="middle" class="th">Guides</text><text x="820" y="440" text-anchor="middle" class="tx">name objects; quote</text><text x="820" y="454" text-anchor="middle" class="tx">measured figures</text>
+    <text x="820" y="422" text-anchor="middle" class="th">Guides</text><text x="820" y="440" text-anchor="middle" class="tx">name objects · small steps</text><text x="820" y="454" text-anchor="middle" class="tx">quote measured figures</text>
 
     <rect x="730" y="500" width="180" height="40" rx="8" class="k-plus"/>
     <text x="820" y="524" text-anchor="middle" class="tl">Save + persist</text>
@@ -323,7 +324,8 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
       <tr><td>Thresholds for the checks</td><td>Ground at z = 0; no side longer than 500 m</td><td class="ids"><a href="#b1">B1</a></td></tr>
       <tr><td>Floor-to-floor height used to count storeys</td><td>3.5 m</td><td class="ids"><a href="#b2">B2</a></td></tr>
       <tr><td>Letting the model run Blender code, which ADR-004 now allows and AGENTS.md hard rule 2 forbids</td><td>Keep it, with B1's checks as the guard. A new ADR supersedes ADR-004, and hard rule 2 is reworded</td><td class="ids"><a href="#b1">B1</a></td></tr>
-      <tr><td>Saves and forks replace bookmarks</td><td>New ADR; ADR-009 withdrawn while still Proposed</td><td class="ids"><a href="#d3">D3</a> <a href="#e3">E3</a></td></tr>
+      <tr><td>How long one Blender script may run before the bridge gives up</td><td>Keep the bridge at 30 s; tell the model to aim for under 8 s per script</td><td class="ids"><a href="#a3">A3</a> <a href="#b1">B1</a></td></tr>
+      <tr><td>Saves and forks replace bookmarks</td><td>New ADR; ADR-009 withdrawn while still Proposed</td><td class="ids"><a href="#d3">D3</a> <a href="#e2">E2</a></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -333,7 +335,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
   <h2>The stories: today's gap, and how each is proved</h2>
   <p class="out">Proof methods come from AGENTS.md: <code>app</code> is a logged manual Blender run, and <code>unit</code> is a test with the scripted model and a recorded scene. Nothing in a test needs a running Blender or a live LLM.</p>
 
-  <div class="epic-block"><h3>Shape it by chat <span class="sub">Context · Agent loop</span></h3><div class="stories">
+  <div class="epic-block"><h3>Shape it by chat <span class="sub">Context · Guides</span></h3><div class="stories">
     <article class="story" id="a1">
       <span class="id">A1</span>
       <h3>Every run starts from the current scene</h3>
@@ -360,14 +362,15 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     </article>
     <article class="story" id="a3">
       <span class="id">A3</span>
-      <h3>Talk an idea through without touching Blender</h3>
-      <p class="why">A "Discuss only" switch by the prompt box lets the architect develop an idea with Corbi, then ask it to build what they agreed.</p>
-      <p class="today"><b>Today</b> The model only has no tools when Blender is closed. With Blender open there's no way to talk without it acting, and every run saves a file even when nothing changed.</p>
+      <h3>Big builds go in small steps that are safe to repeat</h3>
+      <p class="why">A large request, such as a detailed landmark, is built one part at a time, so Blender never freezes and a retry never duplicates geometry.</p>
+      <p class="today"><b>Today</b> In UAT, one long script for a detailed building froze Blender, which runs every script on its main thread, until the 30-second bridge timeout. A blind retry would have built the same geometry twice. Nothing tells the model to keep scripts short.</p>
       <ol>
-        <li>With the switch on, the run's tool list is empty and the scene is unchanged<span class="m">api</span></li>
-        <li>With the switch off, "build what we discussed" builds it<span class="m">app</span></li>
-        <li>A discuss-only answer makes no save<span class="m">db</span></li>
+        <li>The system prompt tells the model to build one part per script (a block, a tower, a façade), to put each part in its own named collection, and to clear that collection before rebuilding it<span class="m">code</span></li>
+        <li>A timed-out script reaches the model as "Blender may still be running", not as a plain failure<span class="m">unit</span></li>
+        <li>A detailed building, such as a cathedral, finishes without a timeout, and asking for it again leaves one copy<span class="m">app</span></li>
       </ol>
+      <p class="dep"><b>Blocked on</b> the script time decision</p>
     </article>
   </div></div>
 
@@ -379,6 +382,7 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
       <p class="today"><b>Today</b> A <code>bpy</code> error already comes back to the model as a failed tool result. Code that runs without error but builds the wrong thing is never checked.</p>
       <ol>
         <li>After a scene-changing tool call, the checks run before the model's next turn<span class="m">unit</span></li>
+        <li>After a call that failed or timed out, Corbi waits until Blender answers, then reads the scene, so the model sees what was actually built before it retries<span class="m">unit</span></li>
         <li>An object below ground, with no volume, or with a side over the size limit fails, and the model's next turn sees the report<span class="m">unit</span></li>
         <li>A change that passes every check adds nothing to the model's context<span class="m">unit</span></li>
         <li>The checks run in tests against a recorded scene, without Blender or a live LLM<span class="m">cli</span></li>
@@ -465,11 +469,12 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     </article>
     <article class="story" id="d2">
       <span class="id">D2</span>
-      <h3>Opening a project puts its latest save back in Blender</h3>
-      <p class="why">The architect carries on where they stopped, with the model they left.</p>
-      <p class="today"><b>Today</b> Loading a project brings back its chat but not its model: Blender keeps whatever it already had open.</p>
+      <h3>Blender always shows this session's own file</h3>
+      <p class="why">A new project or session starts in an empty Blender file, and opening one puts its latest save back. One project's model never ends up in another's file.</p>
+      <p class="today"><b>Today</b> Blender keeps whatever it had open. In UAT, a new model was added into another project's open file, and the save then copied the whole mixed scene into the new project. Loading a project brings back its chat but not its model.</p>
       <ol>
-        <li>Loading a project opens its session's latest save in Blender<span class="m">app</span></li>
+        <li>Starting a project or a session opens an empty Blender file<span class="m">app</span></li>
+        <li>Opening a session opens its latest save, and its first save afterwards contains only that session's objects<span class="m">app</span></li>
         <li>Opening a file is done by the API and isn't a tool the model can call<span class="m">code</span></li>
         <li>With Blender closed, the project still loads and the chat says the file wasn't opened<span class="m">browser</span></li>
       </ol>
@@ -504,6 +509,19 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
     </article>
     <article class="story" id="e2">
       <span class="id">E2</span>
+      <h3>Run several sessions in a project, in a wider workspace</h3>
+      <p class="why">A project has a sessions sidebar: the architect starts a new session or switches to an older one, and the chat uses the width of the screen.</p>
+      <p class="today"><b>Today</b> The database allows many sessions per project, but the web app is one project, one session: loading opens only the last-touched session and there's no way to start another. The API lists bookmarked sessions, but the web app never shows them. In UAT the workspace was too narrow.</p>
+      <ol>
+        <li>The project view lists every session, newest first, and opening one shows its own chat<span class="m">browser</span></li>
+        <li>New session starts an empty chat, with an empty Blender file from D2<span class="m">browser</span></li>
+        <li>On a 1440-pixel-wide window, the sidebar and chat together fill the width, with no fixed narrow column<span class="m">browser</span></li>
+        <li>The bookmark endpoints are replaced by <code>GET /projects/{id}/sessions</code>, and the contract is regenerated<span class="m">code</span></li>
+      </ol>
+      <p class="dep"><b>Uses</b> D2 for the empty file · <b>Blocked on</b> the saves and forks ADR</p>
+    </article>
+    <article class="story" id="e3">
+      <span class="id">E3</span>
       <h3>Sessions name themselves from my first prompt</h3>
       <p class="why">A fast model call on the first prompt gives the session a short title, which the architect can rename.</p>
       <p class="today"><b>Today</b> Sessions have a <code>name</code> column, but only the bookmark call sets it, so new sessions are unnamed.</p>
@@ -513,24 +531,12 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
         <li>A failed title call leaves the name empty and the run unaffected<span class="m">unit</span></li>
       </ol>
     </article>
-    <article class="story" id="e3">
-      <span class="id">E3</span>
-      <h3>Switch between a project's sessions</h3>
-      <p class="why">A project lists its sessions by title, newest first, and the architect opens any of them with its chat.</p>
-      <p class="today"><b>Today</b> Loading a project opens only its last-touched session. The API can list bookmarked sessions, but the web app never shows them, so older sessions can't be reached.</p>
-      <ol>
-        <li>The project view lists every session by title, newest first<span class="m">browser</span></li>
-        <li>Opening a session shows its own chat<span class="m">browser</span></li>
-        <li>The bookmark endpoints are replaced by <code>GET /projects/{id}/sessions</code>, and the contract is regenerated<span class="m">code</span></li>
-      </ol>
-      <p class="dep"><b>Depends on</b> E2 · <b>Blocked on</b> the saves and forks ADR</p>
-    </article>
   </div></div>
 </section>
 
 <section>
   <h2>Not this week</h2>
-  <p class="out">Reading briefs · site suggestion · building-type generators and the massing schema · Rhino and Revit · evals over answer files · site and planning checks · comparing saves side by side · more than one user</p>
+  <p class="out">Discuss-only mode (#86) · reading briefs · site suggestion · building-type generators and the massing schema · Rhino and Revit · evals over answer files · site and planning checks · comparing saves side by side · more than one user</p>
 </section>
 </div>
 
