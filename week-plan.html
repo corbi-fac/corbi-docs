@@ -48,6 +48,19 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
 .ids { font: 500 13px var(--mono); white-space: nowrap; }
 .ids a { color: var(--accent); }
 
+.matrix { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.epic { display: grid; grid-template-rows: auto 1fr 1fr 1fr; gap: 10px; min-width: 0; }
+.epic-head { border-top: 3px solid var(--ink); padding-top: 10px; display: grid; gap: 2px; align-content: start; }
+.epic-head.box-h { border-top-color: var(--accent); }
+.epic-head .box { font: 500 11px var(--mono); color: var(--muted); }
+.epic-head.box-h .box { color: var(--accent); font-weight: 600; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; align-content: start; text-decoration: none; color: inherit; min-width: 0; }
+.card:hover { border-color: var(--ink); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card .id { font: 600 13px var(--mono); color: var(--accent); }
+.card .t { font: 500 14.5px/1.35 var(--sans); }
+.card .from { font: 400 11.5px var(--mono); color: var(--muted); }
+@media (max-width: 1000px) { .matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .epic { grid-template-rows: none; } }
 .epic-block { display: grid; gap: 12px; }
 .epic-block > h3 { font-size: 20px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
 .epic-block > h3 .sub { font: 500 12px var(--mono); color: var(--muted); }
@@ -98,9 +111,46 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
   <p class="lede">By Tuesday 24 November, Corbi checks what it builds in Blender, gives a reason for how every run ended, and lets you reopen any answer or carry on from it. Five people each own one epic of three user stories.</p>
 </header>
 
+<!-- EPICS -->
+<section>
+  <h2>Five epics, three stories each</h2>
+  <div class="matrix">
+    <div class="epic">
+      <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Agent loop</span></div>
+      <a class="card" href="#a1"><span class="id">A1</span><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
+      <a class="card" href="#a2"><span class="id">A2</span><div class="t">Refer to each building by name</div><div class="from">new</div></a>
+      <a class="card" href="#a3"><span class="id">A3</span><div class="t">Talk an idea through without touching Blender</div><div class="from">from #86</div></a>
+    </div>
+    <div class="epic">
+      <div class="epic-head box-h"><h3>Check what was built</h3><span class="box">Sensors · new</span></div>
+      <a class="card" href="#b1"><span class="id">B1</span><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div></a>
+      <a class="card" href="#b2"><span class="id">B2</span><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div></a>
+      <a class="card" href="#b3"><span class="id">B3</span><div class="t">See which checks passed under each answer</div><div class="from">new</div></a>
+    </div>
+    <div class="epic">
+      <div class="epic-head box-h"><h3>Finish a run cleanly</h3><span class="box">Termination · new</span></div>
+      <a class="card" href="#c1"><span class="id">C1</span><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div></a>
+      <a class="card" href="#c2"><span class="id">C2</span><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div></a>
+      <a class="card" href="#c3"><span class="id">C3</span><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div></a>
+    </div>
+    <div class="epic">
+      <div class="epic-head"><h3>Come back to my work</h3><span class="box">Memory · saves</span></div>
+      <a class="card" href="#d1"><span class="id">D1</span><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d2"><span class="id">D2</span><div class="t">Opening a project puts its latest save back in Blender</div><div class="from">from #87</div></a>
+      <a class="card" href="#d3"><span class="id">D3</span><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
+    </div>
+    <div class="epic">
+      <div class="epic-head"><h3>Follow along</h3><span class="box">Progress feed · sessions</span></div>
+      <a class="card" href="#e1"><span class="id">E1</span><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
+      <a class="card" href="#e2"><span class="id">E2</span><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
+      <a class="card" href="#e3"><span class="id">E3</span><div class="t">Switch between a project's sessions</div><div class="from">replaces bookmarks</div></a>
+    </div>
+  </div>
+</section>
+
 <!-- PLAN -->
 <section>
-  <h2>What each owner delivers by 24 November</h2>
+  <h2>What each owner delivers by 24 November, and what crosses lanes</h2>
   <figure><div class="scroll">
   <svg viewBox="0 0 1200 556" role="img" aria-label="Five lanes, one per owner. Shape it by chat: A1 every run starts from the current scene, A2 refer to each building by name, A3 talk an idea through without touching Blender. Check what was built: B1 Corbi checks every change and fixes its own mistakes, B2 answers quote figures measured in Blender, B3 see which checks passed. Finish a run cleanly: C1 step and time limit with a reason, C2 stop button, C3 stop and ask when stuck. Come back to my work: D1 a save after every answer, D2 reopen the latest save, D3 carry on from an earlier save. Follow along: E1 only my session's steps with failures marked, E2 sessions name themselves, E3 switch between sessions. Cross-lane links: A1 and B1 share the scene reader, B1 unlocks C3, E1 unlocks B3.">
     <defs>
