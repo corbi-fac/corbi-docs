@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Corbi Architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: one reading column, diagrams break out wider inside their own scroll boxes. Colour = layer. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --ink: #172030; --muted: #5a6577; --line: #c8d0dc; --accent: #0d7f73;
+  --web: #6d48c9; --web-t: #f1ecfc; --api: #2457c9; --api-t: #eaf0fd; --h: #0d7f73; --h-t: #e3f5f2;
+  --mcp: #c45a12; --mcp-t: #fdf0e6; --db: #3b7f35; --db-t: #ebf6e9; --llm: #a8306f; --llm-t: #fbeaf3;
+  --warn: #a3410c; --warn-t: #fff1e6;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4;
+  --web: #a78bf0; --web-t: #221b38; --api: #6f9bf5; --api-t: #16233f; --h: #3fc4b4; --h-t: #10302d;
+  --mcp: #f0954f; --mcp-t: #33210f; --db: #7ccb72; --db-t: #172d15; --llm: #e57bb2; --llm-t: #351426;
+  --warn: #f0a46a; --warn-t: #33200f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f131a; --surface: #161c26; --ink: #e5e9f0; --muted: #98a3b4; --line: #2e3746; --accent: #3fc4b4;
+  --web: #a78bf0; --web-t: #221b38; --api: #6f9bf5; --api-t: #16233f; --h: #3fc4b4; --h-t: #10302d;
+  --mcp: #f0954f; --mcp-t: #33210f; --db: #7ccb72; --db-t: #172d15; --llm: #e57bb2; --llm-t: #351426;
+  --warn: #f0a46a; --warn-t: #33200f; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 44px/1.05 var(--display); margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h2 { font: 600 24px/1.2 var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); }
+section { display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 6px; }
+.sec-head .eyebrow { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; }
+.scroll { overflow-x: auto; padding: 16px; }
+figure svg { display: block; width: 100%; height: auto; min-width: 900px; color: var(--ink); }
+figure.narrow svg { min-width: 640px; max-width: 820px; }
+figcaption { border-top: 1px solid var(--line); padding: 12px 16px; font-size: 13.5px; color: var(--muted); }
+figcaption b { color: var(--ink); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font: 12px var(--mono); color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; font-size: 14px; }
+.note h3 { font: 600 14px var(--sans); margin: 0; }
+.note.warn { background: var(--warn-t); border-color: var(--warn); }
+.status { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.status .col { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.chip { font: 600 11px var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; justify-self: start; border: 1.5px solid; }
+.chip.ok { color: var(--db); border-color: var(--db); background: var(--db-t); }
+.chip.half { color: var(--mcp); border-color: var(--mcp); background: var(--mcp-t); }
+.chip.no { color: var(--muted); border-color: var(--line); }
+.status ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+
+/* SVG vocabulary */
+.box { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.k-web { fill: var(--web-t); stroke: var(--web); stroke-width: 1.4; }
+.k-api { fill: var(--api-t); stroke: var(--api); stroke-width: 1.4; }
+.k-h { fill: var(--h-t); stroke: var(--h); stroke-width: 1.8; }
+.k-mcp { fill: var(--mcp-t); stroke: var(--mcp); stroke-width: 1.4; }
+.k-db { fill: var(--db-t); stroke: var(--db); stroke-width: 1.4; }
+.k-llm { fill: var(--llm-t); stroke: var(--llm); stroke-width: 1.4; }
+.k-ink { fill: var(--ink); stroke: var(--ink); }
+.frame { fill: none; stroke: var(--line); stroke-width: 1.4; stroke-dasharray: 6 5; }
+.th { font: 600 13px var(--sans); fill: var(--ink); }
+.tl { font: 500 12px var(--mono); fill: var(--ink); }
+.ts { font: 400 11px var(--mono); fill: var(--muted); }
+.tx { font: 400 10.5px var(--mono); fill: var(--muted); }
+.ta { font: 600 11px var(--mono); fill: var(--accent); }
+.tw { font: 600 11px var(--mono); fill: var(--warn); }
+.tinv { font: 600 12px var(--mono); fill: var(--bg); }
+.e { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.e-m { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.e-a { stroke: var(--accent); stroke-width: 2; fill: none; }
+.d { stroke-dasharray: 5 4; }
+.life { stroke: var(--line); stroke-width: 1.2; stroke-dasharray: 3 4; }
+.mk { fill: var(--ink); }
+.mk-m { fill: var(--muted); }
+.mk-a { fill: var(--accent); }
+.ghost { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+.hframe { fill: var(--bg); stroke: var(--line); stroke-width: 1.4; }
+.tag { fill: var(--h-t); stroke: var(--h); stroke-width: 1; }
+.tag-c { fill: var(--api-t); stroke: var(--api); stroke-width: 1; }
+.tapi { font: 600 11px var(--mono); fill: var(--api); }
+.band { fill: var(--accent); fill-opacity: .08; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 4 4; }
+@media (max-width: 600px) { h1 { font-size: 34px; } }
+</style>
+</head>
+<body>
+<nav style="max-width:1240px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 0;font:500 13px 'IBM Plex Mono',ui-monospace,monospace"><a href="./" style="color:inherit;opacity:.7">← Corbi docs</a></nav>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Corbi · 17 Nov 2026 · as built on <span class="mono">feat/123-save-blender-file</span></div>
+  <h1>Corbi Architecture</h1>
+  <p class="lede">How Corbi works today: the web app, the FastAPI process and its LangGraph harness, the MCP bridge to Blender, and what lands in SQLite and the data directory.</p>
+  <div class="legend">
+    <span><i style="border-color:var(--web);background:var(--web-t)"></i>web</span>
+    <span><i style="border-color:var(--api);background:var(--api-t)"></i>API layers</span>
+    <span><i style="border-color:var(--h);background:var(--h-t)"></i>harness</span>
+    <span><i style="border-color:var(--mcp);background:var(--mcp-t)"></i>MCP / Blender</span>
+    <span><i style="border-color:var(--llm);background:var(--llm-t)"></i>LLM</span>
+    <span><i style="border-color:var(--db);background:var(--db-t)"></i>storage</span>
+  </div>
+</header>
+
+<!-- 1. SYSTEM -->
+<section>
+  <div class="sec-head"><div class="eyebrow">01 · System</div><h2>Processes and who talks to whom</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1130 575" role="img" aria-label="The browser calls FastAPI over REST and receives progress over SSE. Inside FastAPI, routes call controllers and repositories; the run controller drives the LangGraph harness, which calls the LLM, loads tools through the MCP client, and saves files. The MCP client spawns the corbi_server subprocess, which talks to the Blender add-on over TCP. Repositories write SQLite; the file store writes .blend copies to the data directory.">
+    <defs>
+      <marker id="o-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="o-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-m"/></marker>
+      <marker id="o-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+
+    <!-- browser -->
+    <rect x="20" y="70" width="190" height="252" rx="8" class="k-web"/>
+    <text x="34" y="94" class="th">Web app</text>
+    <text x="34" y="112" class="ts">Vite + React · :5173</text>
+    <text x="34" y="127" class="ts">proxies /api → :8000</text>
+    <text x="34" y="156" class="tl">App.tsx</text><text x="34" y="170" class="tx">project flow, session id</text>
+    <text x="34" y="194" class="tl">useConversation</text><text x="34" y="208" class="tx">chat + live feed</text>
+    <text x="34" y="232" class="tl">ModelSelectorBar</text><text x="34" y="246" class="tx">pick the LLM</text>
+    <text x="34" y="270" class="tl">ProgramStatusTable</text><text x="34" y="284" class="tx">Blender found / running</text>
+    <text x="34" y="308" class="tl">lib/api ← contract</text>
+
+    <!-- browser ↔ routes -->
+    <line x1="210" y1="84" x2="348" y2="84" class="e" marker-end="url(#o-a)"/>
+    <text x="280" y="78" text-anchor="middle" class="tx">POST /agent/run</text>
+    <line x1="350" y1="112" x2="212" y2="112" class="e-a d" marker-end="url(#o-h)"/>
+    <text x="280" y="106" text-anchor="middle" class="ta" style="font-size:10.5px">SSE /feedback/stream</text>
+    <line x1="212" y1="140" x2="348" y2="140" class="e" marker-start="url(#o-a)" marker-end="url(#o-a)"/>
+    <text x="280" y="134" text-anchor="middle" class="tx">REST: projects…</text>
+
+    <!-- FastAPI container -->
+    <rect x="330" y="30" width="520" height="410" rx="12" class="frame"/>
+    <text x="344" y="54" class="th">FastAPI process · :8000</text>
+
+    <rect x="350" y="70" width="150" height="80" rx="6" class="k-api"/>
+    <text x="364" y="92" class="th">routes/</text>
+    <text x="364" y="110" class="tx">run · feedback · init</text>
+    <text x="364" y="124" class="tx">projects · sessions</text>
+    <text x="364" y="138" class="tx">programs · ai-model</text>
+
+    <rect x="350" y="172" width="150" height="56" rx="6" class="k-api"/>
+    <text x="364" y="194" class="th">controllers/</text>
+    <text x="364" y="212" class="tx">rows → Pydantic</text>
+
+    <rect x="350" y="250" width="150" height="56" rx="6" class="k-api"/>
+    <text x="364" y="270" class="th">repository/</text>
+    <text x="364" y="286" class="tx">Project · Session</text>
+    <text x="364" y="299" class="tx">Chat · ModelFile</text>
+
+    <rect x="530" y="70" width="300" height="158" rx="8" class="k-h"/>
+    <text x="546" y="94" class="th">harness/ · LangGraph StateGraph</text>
+    <text x="546" y="118" class="ts">start_run → gather_info → call_llm</text>
+    <text x="546" y="136" class="ts">call_llm ⇄ handle_tool  (tool loop)</text>
+    <text x="546" y="154" class="ts">call_llm → save → feedback → END</text>
+    <text x="546" y="182" class="tx">HarnessRuntime bound per request</text>
+    <text x="546" y="196" class="tx">by ContextVar: db, model, tools,</text>
+    <text x="546" y="210" class="tx">feedback service, data dir</text>
+
+    <rect x="530" y="250" width="150" height="56" rx="6" class="k-api"/>
+    <text x="544" y="270" class="th">services/</text>
+    <text x="544" y="286" class="tx">gather_info · chat</text>
+    <text x="544" y="299" class="tx">feedback · ai_model</text>
+
+    <rect x="350" y="340" width="150" height="80" rx="6" class="k-api"/>
+    <text x="364" y="360" class="th">system/</text>
+    <text x="364" y="378" class="tx">detect · launch</text>
+    <text x="364" y="392" class="tx">install add-on</text>
+    <text x="364" y="406" class="tx">Blender·Rhino·Revit</text>
+
+    <rect x="530" y="340" width="150" height="80" rx="6" class="k-api"/>
+    <text x="544" y="360" class="th">files/</text>
+    <text x="544" y="378" class="tx">ModelStore</text>
+    <text x="544" y="392" class="tx">timestamped copy</text>
+    <text x="544" y="406" class="tx">sha256 · size</text>
+
+    <rect x="700" y="340" width="130" height="80" rx="6" class="k-mcp"/>
+    <text x="714" y="360" class="th">mcp/ client</text>
+    <text x="714" y="378" class="tx">MultiServerMCP</text>
+    <text x="714" y="392" class="tx">stateless</text>
+    <text x="714" y="406" class="tx">tools loaded per run</text>
+
+    <!-- internal edges -->
+    <line x1="425" y1="150" x2="425" y2="170" class="e" marker-end="url(#o-a)"/>
+    <line x1="425" y1="228" x2="425" y2="248" class="e" marker-end="url(#o-a)"/>
+    <line x1="500" y1="200" x2="528" y2="200" class="e" marker-end="url(#o-a)"/>
+    <text x="514" y="193" text-anchor="middle" class="tx">run</text>
+    <line x1="605" y1="228" x2="605" y2="248" class="e" marker-end="url(#o-a)"/>
+    <line x1="530" y1="278" x2="502" y2="278" class="e" marker-end="url(#o-a)"/>
+    <path d="M690 228 V380 H682" class="e-a" marker-end="url(#o-h)"/>
+    <text x="694" y="330" class="ta" style="font-size:10px">save</text>
+    <line x1="765" y1="228" x2="765" y2="338" class="e" marker-end="url(#o-a)"/>
+    <text x="771" y="284" class="tx">load_tools</text>
+    <text x="771" y="298" class="tx">tool calls</text>
+
+    <!-- outside -->
+    <rect x="900" y="70" width="210" height="70" rx="8" class="k-llm"/>
+    <text x="914" y="94" class="th">LLM provider</text>
+    <text x="914" y="112" class="ts">Anthropic · Gemini</text>
+    <text x="914" y="128" class="tx">chosen via /ai-model</text>
+    <line x1="830" y1="105" x2="898" y2="105" class="e" marker-start="url(#o-a)" marker-end="url(#o-a)"/>
+    <text x="865" y="98" text-anchor="middle" class="tx">ainvoke</text>
+
+    <rect x="900" y="230" width="210" height="70" rx="8" class="k-mcp"/>
+    <text x="914" y="254" class="th">corbi_server (MCP)</text>
+    <text x="914" y="272" class="ts">stdio subprocess</text>
+    <text x="914" y="288" class="tx">spawned per tool call</text>
+    <path d="M830 372 H865 V265 H898" class="e" marker-end="url(#o-a)"/>
+
+    <rect x="900" y="360" width="210" height="110" rx="8" class="k-mcp"/>
+    <text x="914" y="384" class="th">Blender</text>
+    <text x="914" y="402" class="ts">corbi add-on socket</text>
+    <text x="914" y="418" class="ts">127.0.0.1:9876</text>
+    <text x="914" y="440" class="tx">runs bpy code</text>
+    <text x="914" y="454" class="tx">writes .blend to tmp</text>
+    <line x1="1005" y1="300" x2="1005" y2="358" class="e" marker-end="url(#o-a)"/>
+    <text x="1011" y="333" class="tx">JSON over TCP</text>
+
+    <path d="M425 420 V455 H898" class="e-m d" marker-end="url(#o-m)"/>
+    <text x="760" y="449" text-anchor="middle" class="tx">detect · open · install add-on</text>
+
+    <rect x="330" y="490" width="230" height="66" rx="8" class="k-db"/>
+    <text x="344" y="512" class="th">SQLite · corbi.db</text>
+    <text x="344" y="530" class="ts">projects · sessions</text>
+    <text x="344" y="545" class="ts">chats · models</text>
+    <path d="M350 290 H340 V488" class="e" marker-end="url(#o-a)"/>
+
+    <rect x="580" y="490" width="250" height="66" rx="8" class="k-db"/>
+    <text x="594" y="512" class="th">data dir</text>
+    <text x="594" y="530" class="ts">models/{session_id}/</text>
+    <text x="594" y="545" class="ts">{project}-{UTC}.blend</text>
+    <line x1="605" y1="420" x2="605" y2="488" class="e-a" marker-end="url(#o-h)"/>
+  </svg></div>
+  <figcaption><b>Two channels to the browser.</b> <code>POST /agent/run</code> blocks until the whole run finishes; progress and the assistant's answer arrive separately over the SSE feed, which is one in-memory <code>UserFeedbackService</code> shared by the whole app. <b>No long-lived MCP connection:</b> each tool call spawns <code>corbi_server</code> over stdio, which opens a TCP socket to the Blender add-on.</figcaption>
+  </figure>
+</section>
+
+<!-- 2. HARNESS MODEL -->
+<section>
+  <div class="sec-head"><div class="eyebrow">02 · Harness</div><h2>The course's harness model, filled in with Corbi's parts</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1250 660" role="img" aria-label="The course harness model with Corbi's parts: the user is the web app; inside the harness the agent loop is a LangGraph StateGraph, context is built by gather_info from the system prompt and chat history, tools come from the MCP client, guides are the system prompt and tool docstrings, termination is a reply with no tool calls, sensors are not built. Corbi adds a progress feed and a save and persist step. Outside are the LLM, the corbi_server MCP server, Blender and the SQLite store.">
+    <defs>
+      <marker id="m-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="m-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-m"/></marker>
+    </defs>
+    <!-- user -->
+    <rect x="600" y="14" width="180" height="64" rx="10" class="k-mcp"/>
+    <text x="690" y="40" text-anchor="middle" class="th">User</text>
+    <text x="690" y="60" text-anchor="middle" class="tx">web app · drives the agent</text>
+    <line x1="660" y1="78" x2="660" y2="118" class="e" marker-end="url(#m-a)"/>
+    <text x="652" y="104" text-anchor="end" class="tx">POST /agent/run</text>
+    <line x1="720" y1="163" x2="720" y2="80" class="e" marker-end="url(#m-a)"/>
+    <text x="728" y="104" class="tx">answer + progress (SSE)</text>
+
+    <!-- harness frame -->
+    <rect x="380" y="120" width="620" height="520" rx="16" class="hframe"/>
+    <text x="400" y="142" class="th">Harness</text>
+    <text x="462" y="142" class="tx">harness/ + services/, inside the API process</text>
+
+    <!-- row 1 -->
+    <rect x="400" y="165" width="180" height="86" rx="10" class="ghost"/>
+    <text x="490" y="192" text-anchor="middle" class="th">Sensors</text>
+    <text x="490" y="210" text-anchor="middle" class="tx">not built yet</text>
+    <text x="490" y="226" text-anchor="middle" class="tx">tool errors come back</text>
+    <text x="490" y="240" text-anchor="middle" class="tx">only as ToolMessages</text>
+    <rect x="600" y="165" width="180" height="86" rx="10" class="k-api"/>
+    <text x="690" y="192" text-anchor="middle" class="th">Progress feed</text>
+    <text x="690" y="210" text-anchor="middle" class="tx">UserFeedbackService</text>
+    <text x="690" y="226" text-anchor="middle" class="tx">dispatch() → SSE</text>
+
+    <!-- row 2 -->
+    <rect x="400" y="290" width="180" height="86" rx="10" class="k-h"/>
+    <text x="490" y="317" text-anchor="middle" class="th">Tools</text>
+    <text x="490" y="335" text-anchor="middle" class="tx">all from MCP, run by</text>
+    <text x="490" y="351" text-anchor="middle" class="tx">ToolNode in handle_tool</text>
+    <rect x="600" y="290" width="180" height="86" rx="10" class="k-h" style="stroke-width:2.6"/>
+    <text x="690" y="317" text-anchor="middle" class="th">Agent loop ↻</text>
+    <text x="690" y="335" text-anchor="middle" class="tx">LangGraph StateGraph</text>
+    <text x="690" y="351" text-anchor="middle" class="tx">call_llm ⇄ handle_tool</text>
+    <rect x="800" y="290" width="180" height="86" rx="10" class="k-h"/>
+    <text x="890" y="317" text-anchor="middle" class="th">Context</text>
+    <text x="890" y="335" text-anchor="middle" class="tx">gather_info: system</text>
+    <text x="890" y="351" text-anchor="middle" class="tx">prompt + chats + prompt</text>
+
+    <!-- row 3 -->
+    <rect x="400" y="420" width="180" height="86" rx="10" class="k-h"/>
+    <text x="490" y="447" text-anchor="middle" class="th">MCP client</text>
+    <text x="490" y="465" text-anchor="middle" class="tx">MultiServerMCPClient</text>
+    <text x="490" y="481" text-anchor="middle" class="tx">tools loaded each run</text>
+    <rect x="600" y="420" width="180" height="86" rx="10" class="box" style="stroke-dasharray:5 4"/>
+    <text x="690" y="447" text-anchor="middle" class="th">Termination</text>
+    <text x="690" y="465" text-anchor="middle" class="tx">reply has no tool_calls</text>
+    <text x="690" y="481" text-anchor="middle" class="tx">no step cap configured</text>
+    <rect x="800" y="420" width="180" height="86" rx="10" class="k-h"/>
+    <text x="890" y="447" text-anchor="middle" class="th">Guides</text>
+    <text x="890" y="465" text-anchor="middle" class="tx">system_prompt.py</text>
+    <text x="890" y="481" text-anchor="middle" class="tx">tool docstrings</text>
+
+    <!-- row 4 -->
+    <rect x="600" y="540" width="180" height="86" rx="10" class="k-api"/>
+    <text x="690" y="567" text-anchor="middle" class="th">Save + persist</text>
+    <text x="690" y="585" text-anchor="middle" class="tx">.blend copy + models row</text>
+    <text x="690" y="601" text-anchor="middle" class="tx">then the chat rows</text>
+
+    <!-- outside -->
+    <rect x="1040" y="290" width="190" height="86" rx="10" class="k-mcp"/>
+    <text x="1135" y="317" text-anchor="middle" class="th">LLM</text>
+    <text x="1135" y="335" text-anchor="middle" class="tx">Anthropic · Gemini</text>
+    <text x="1135" y="351" text-anchor="middle" class="tx">bound to the tools</text>
+    <rect x="1040" y="540" width="190" height="86" rx="10" class="k-db"/>
+    <text x="1135" y="567" text-anchor="middle" class="th">SQLite + data dir</text>
+    <text x="1135" y="585" text-anchor="middle" class="tx">chats = memory</text>
+    <text x="1135" y="601" text-anchor="middle" class="tx">models = saves</text>
+    <rect x="200" y="420" width="150" height="86" rx="10" class="k-mcp"/>
+    <text x="275" y="447" text-anchor="middle" class="th">MCP server</text>
+    <text x="275" y="465" text-anchor="middle" class="tx">corbi_server</text>
+    <text x="275" y="481" text-anchor="middle" class="tx">stdio subprocess</text>
+    <rect x="20" y="420" width="150" height="86" rx="10" class="box" style="stroke-dasharray:5 4"/>
+    <text x="95" y="447" text-anchor="middle" class="th">the world</text>
+    <text x="95" y="465" text-anchor="middle" class="tx">Blender scene</text>
+    <text x="95" y="481" text-anchor="middle" class="tx">bpy over TCP</text>
+
+    <!-- edges -->
+    <line x1="690" y1="288" x2="690" y2="253" class="e" marker-end="url(#m-a)"/>
+    <line x1="490" y1="290" x2="490" y2="253" class="e-m d" marker-end="url(#m-m)"/>
+    <path d="M490 165 V154 H890 V288" class="e-m d" marker-end="url(#m-m)"/>
+    <text x="896" y="226" class="tx">feedback</text>
+    <line x1="490" y1="378" x2="490" y2="418" class="e" marker-start="url(#m-a)" marker-end="url(#m-a)"/>
+    <text x="498" y="402" class="tx">calls</text>
+    <line x1="598" y1="333" x2="582" y2="333" class="e" marker-end="url(#m-a)"/>
+    <line x1="690" y1="376" x2="690" y2="418" class="e" marker-end="url(#m-a)"/>
+    <line x1="690" y1="506" x2="690" y2="538" class="e" marker-end="url(#m-a)"/>
+    <line x1="890" y1="420" x2="890" y2="380" class="e" marker-end="url(#m-a)"/>
+    <text x="884" y="412" text-anchor="end" class="tx">feedforward</text>
+    <line x1="980" y1="320" x2="1038" y2="320" class="e" marker-end="url(#m-a)"/>
+    <line x1="1038" y1="346" x2="982" y2="346" class="e" marker-end="url(#m-a)"/>
+    <path d="M1080 540 V398 H860 V380" class="e" marker-end="url(#m-a)"/>
+    <text x="1074" y="470" text-anchor="end" class="tx">chat history</text>
+    <line x1="780" y1="583" x2="1038" y2="583" class="e" marker-end="url(#m-a)"/>
+    <text x="910" y="576" text-anchor="middle" class="tx">writes</text>
+    <line x1="398" y1="463" x2="352" y2="463" class="e" marker-start="url(#m-a)" marker-end="url(#m-a)"/>
+    <line x1="198" y1="463" x2="172" y2="463" class="e" marker-start="url(#m-a)" marker-end="url(#m-a)"/>
+    <path d="M600 605 H95 V508" class="e-a d" marker-end="url(#o-h)"/>
+    <text x="300" y="598" class="ta">save_file() called directly, not as a tool</text>
+  </svg></div>
+  <figcaption>
+    <div class="legend" style="margin-bottom:8px">
+      <span><i style="border-color:var(--mcp);background:var(--mcp-t)"></i>outside the harness</span>
+      <span><i style="border-color:var(--h);background:var(--h-t)"></i>inside the harness</span>
+      <span><i style="border-color:var(--api);background:var(--api-t)"></i>Corbi additions</span>
+      <span><i style="border-color:var(--muted);border-style:dashed"></i>not built</span>
+    </div>
+    <b>How the two views relate.</b> The course model lists what a harness needs. LangGraph is how Corbi wires the <b>agent loop</b> and <b>termination</b>: the graph's edges are the loop. Context, guides, tools and the MCP client aren't LangGraph features. They're Corbi services that the graph's nodes call. Corbi adds two parts the course model doesn't have: a <b>progress feed</b> to the user while the loop runs, and a <b>save and persist</b> step after it ends. <b>Sensors don't exist yet.</b> The only feedback signal is a tool error passed back as a message. The massing validators planned in ADR-002 would fill that box.
+  </figcaption>
+  </figure>
+</section>
+
+<!-- 3. HARNESS -->
+<section>
+  <div class="sec-head"><div class="eyebrow">03 · LangGraph</div><h2>The LangGraph graph, which is the whole state machine</h2></div>
+  <p>The state machine is a LangGraph <code>StateGraph</code> compiled in <code>harness_state_machine.py</code>, and these six nodes are the entire graph. Each node is a small class that calls into <code>services/</code>. There are no subgraphs and no checkpointer. Writing the chat rows happens outside the graph, after it returns. The tags show which box of the harness model each node implements.</p>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1120 400" role="img" aria-label="LangGraph state machine: start_run, gather_info, call_llm. If the LLM returned tool calls, go to handle_tool and back to call_llm. Otherwise go to save, then feedback, then END. After the graph returns, run_harness persists the new chat rows. Each node is tagged with the harness-model box it implements.">
+    <rect x="80" y="38" width="66" height="20" rx="4" class="tag"/><text x="86" y="52" class="ta">User I/O</text>
+    <rect x="250" y="38" width="122" height="20" rx="4" class="tag"/><text x="256" y="52" class="ta">Context + Guides</text>
+    <rect x="430" y="38" width="122" height="20" rx="4" class="tag"/><text x="436" y="52" class="ta">Agent loop ↔ LLM</text>
+    <rect x="650" y="38" width="86" height="20" rx="4" class="tag-c"/><text x="656" y="52" class="tapi">Corbi: save</text>
+    <rect x="820" y="38" width="92" height="20" rx="4" class="tag"/><text x="826" y="52" class="ta">User: answer</text>
+    <rect x="964" y="38" width="90" height="20" rx="4" class="tag"/><text x="970" y="52" class="ta">Termination</text>
+    <rect x="430" y="368" width="136" height="20" rx="4" class="tag"/><text x="436" y="382" class="ta">Tools + MCP client</text>
+    <rect x="925" y="368" width="110" height="20" rx="4" class="tag-c"/><text x="931" y="382" class="tapi">Corbi: persist</text>
+    <defs>
+      <marker id="h-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="h-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <!-- annotations -->
+    <text x="80" y="118" class="tx">SSE: user prompt</text>
+    <text x="80" y="134" class="tx">SSE: "Waiting..."</text>
+    <text x="250" y="86" class="tx">read session chats</text>
+    <text x="250" y="102" class="tx">load_tools() via MCP</text>
+    <text x="250" y="118" class="tx">bind model + tools</text>
+    <text x="250" y="134" class="tx">build system prompt</text>
+    <text x="430" y="134" class="tx">model.ainvoke(messages)</text>
+    <text x="650" y="86" class="ta">Blender reachable?</text>
+    <text x="650" y="102" class="tx">save_file → tmp .blend</text>
+    <text x="650" y="118" class="tx">ModelStore copies it</text>
+    <text x="650" y="134" class="tx">models row + commit</text>
+    <text x="820" y="134" class="tx">SSE: assistant text</text>
+
+    <circle cx="40" cy="178" r="11" class="k-ink"/>
+    <text x="40" y="214" text-anchor="middle" class="tx">START</text>
+    <line x1="51" y1="178" x2="78" y2="178" class="e" marker-end="url(#h-a)"/>
+    <rect x="80" y="150" width="130" height="56" rx="8" class="k-h"/><text x="145" y="183" text-anchor="middle" class="tl">start_run</text>
+    <line x1="210" y1="178" x2="248" y2="178" class="e" marker-end="url(#h-a)"/>
+    <rect x="250" y="150" width="140" height="56" rx="8" class="k-h"/><text x="320" y="183" text-anchor="middle" class="tl">gather_info</text>
+    <line x1="390" y1="178" x2="428" y2="178" class="e" marker-end="url(#h-a)"/>
+    <rect x="430" y="150" width="130" height="56" rx="8" class="k-h"/><text x="495" y="183" text-anchor="middle" class="tl">call_llm</text>
+    <line x1="560" y1="178" x2="648" y2="178" class="e" marker-end="url(#h-a)"/>
+    <text x="604" y="171" text-anchor="middle" class="tx">no tool_calls</text>
+    <rect x="650" y="150" width="130" height="56" rx="8" class="k-h" style="stroke-width:2.4"/><text x="715" y="183" text-anchor="middle" class="tl">save</text>
+    <line x1="780" y1="178" x2="818" y2="178" class="e" marker-end="url(#h-a)"/>
+    <rect x="820" y="150" width="130" height="56" rx="8" class="k-h"/><text x="885" y="183" text-anchor="middle" class="tl">feedback</text>
+    <line x1="950" y1="178" x2="997" y2="178" class="e" marker-end="url(#h-a)"/>
+    <circle cx="1010" cy="178" r="11" class="box" style="stroke:var(--ink);stroke-width:2"/><circle cx="1010" cy="178" r="5" class="k-ink"/>
+    <text x="1010" y="214" text-anchor="middle" class="tx">END</text>
+
+    <rect x="430" y="270" width="130" height="56" rx="8" class="k-mcp"/><text x="495" y="303" text-anchor="middle" class="tl">handle_tool</text>
+    <line x1="470" y1="206" x2="470" y2="268" class="e" marker-end="url(#h-a)"/>
+    <text x="462" y="242" text-anchor="end" class="tx">tool_calls</text>
+    <line x1="520" y1="270" x2="520" y2="208" class="e" marker-end="url(#h-a)"/>
+    <text x="528" y="242" class="tx">ToolMessages</text>
+    <text x="430" y="344" class="tx">SSE: progress label</text>
+    <text x="430" y="358" class="tx">ToolNode → MCP tools</text>
+
+    <rect x="925" y="270" width="175" height="56" rx="8" class="k-db" style="stroke-width:2.4"/>
+    <text x="1012" y="295" text-anchor="middle" class="tl">persist chats</text>
+    <text x="1012" y="312" text-anchor="middle" class="tx">run_harness, after END</text>
+    <line x1="1010" y1="189" x2="1010" y2="268" class="e-a d" marker-end="url(#h-h)"/>
+    <text x="925" y="344" class="tx">user · assistant · tool rows</text>
+  </svg></div>
+  <figcaption><b>Every run saves a model when Blender is up.</b> <code>save</code> is in the main path, so each answered prompt leaves one <code>.blend</code> copy and one <code>models</code> row. <b>The chat rows are written last</b>, after the graph returns. This means a turn's <code>models.created_at</code> comes before that same turn's chat rows. The proposal page builds on this ordering. There is no LangGraph checkpointer: each run rebuilds context from the <code>chats</code> table in <code>gather_info</code>.</figcaption>
+  </figure>
+
+  <figure class="narrow"><div class="scroll">
+  <svg viewBox="0 0 820 170" role="img" aria-label="corbi_server list_tools: if Blender answers on its socket, the LLM gets get_scene_info, execute_blender_code and save_file; otherwise it gets no tools.">
+    <defs><marker id="t-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker></defs>
+    <rect x="20" y="60" width="150" height="50" rx="8" class="k-h"/><text x="95" y="90" text-anchor="middle" class="tl">gather_info</text>
+    <line x1="170" y1="85" x2="218" y2="85" class="e" marker-end="url(#t-a)"/>
+    <text x="194" y="78" text-anchor="middle" class="tx">list_tools</text>
+    <path d="M300 45 L380 85 L300 125 L220 85 Z" class="k-mcp"/>
+    <text x="300" y="82" text-anchor="middle" class="tx">Blender</text><text x="300" y="95" text-anchor="middle" class="tx">answers?</text>
+    <path d="M380 85 H420 V40 H448" class="e" marker-end="url(#t-a)"/><text x="400" y="34" class="tx">yes</text>
+    <path d="M380 85 H420 V135 H448" class="e" marker-end="url(#t-a)"/><text x="400" y="152" class="tx">no</text>
+    <rect x="450" y="14" width="350" height="54" rx="6" class="k-mcp"/>
+    <text x="464" y="36" class="tl">get_scene_info · execute_blender_code</text>
+    <text x="464" y="54" class="tl">save_file</text>
+    <text x="786" y="54" text-anchor="end" class="tw">bpy code from the LLM</text>
+    <rect x="450" y="112" width="350" height="44" rx="6" class="box"/>
+    <text x="464" y="139" class="tl">[ ]  the LLM runs with no tools</text>
+  </svg></div>
+  <figcaption>The tool surface the model sees, set again on every run. <code>save</code> calls <code>save_file</code> directly as a Python function, not as an LLM tool call.</figcaption>
+  </figure>
+</section>
+
+<!-- 4. SEQUENCE -->
+<section>
+  <div class="sec-head"><div class="eyebrow">04 · One prompt</div><h2>A prompt from the browser to Blender and back</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1010 556" role="img" aria-label="Sequence of one run: web posts the prompt, API binds the runtime, harness streams progress, reads chats, lists tools, loops LLM and tool calls, saves the Blender file and its row, streams the answer, persists chat rows, then the POST returns.">
+    <defs>
+      <marker id="q-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+      <marker id="q-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk-a"/></marker>
+    </defs>
+    <rect x="15" y="16" width="110" height="38" rx="6" class="k-web"/><text x="70" y="40" text-anchor="middle" class="tl">Web</text>
+    <rect x="175" y="16" width="110" height="38" rx="6" class="k-api"/><text x="230" y="40" text-anchor="middle" class="tl">API</text>
+    <rect x="345" y="16" width="110" height="38" rx="6" class="k-h"/><text x="400" y="40" text-anchor="middle" class="tl">Harness</text>
+    <rect x="515" y="16" width="110" height="38" rx="6" class="k-llm"/><text x="570" y="40" text-anchor="middle" class="tl">LLM</text>
+    <rect x="680" y="16" width="140" height="38" rx="6" class="k-mcp"/><text x="750" y="40" text-anchor="middle" class="tl">MCP → Blender</text>
+    <rect x="865" y="16" width="130" height="38" rx="6" class="k-db"/><text x="930" y="40" text-anchor="middle" class="tl">SQLite + files</text>
+    <line x1="70" y1="54" x2="70" y2="548" class="life"/><line x1="230" y1="54" x2="230" y2="548" class="life"/>
+    <line x1="400" y1="54" x2="400" y2="548" class="life"/><line x1="570" y1="54" x2="570" y2="548" class="life"/>
+    <line x1="750" y1="54" x2="750" y2="548" class="life"/><line x1="930" y1="54" x2="930" y2="548" class="life"/>
+
+    <rect x="384" y="222" width="382" height="176" rx="6" class="band"/>
+    <text x="760" y="236" text-anchor="end" class="ta">loop while tool_calls</text>
+
+    <line x1="70" y1="90" x2="228" y2="90" class="e" marker-end="url(#q-a)"/><text x="150" y="84" text-anchor="middle" class="tx">POST /agent/run</text>
+    <line x1="230" y1="120" x2="398" y2="120" class="e" marker-end="url(#q-a)"/><text x="315" y="114" text-anchor="middle" class="tx">bind runtime · run</text>
+    <line x1="400" y1="150" x2="72" y2="150" class="e d" marker-end="url(#q-a)"/><text x="235" y="144" text-anchor="middle" class="tx">SSE: prompt, "Waiting..."</text>
+    <line x1="400" y1="180" x2="928" y2="180" class="e" marker-end="url(#q-a)"/><text x="665" y="174" text-anchor="middle" class="tx">read all chats for the session</text>
+    <line x1="400" y1="210" x2="748" y2="210" class="e" marker-end="url(#q-a)"/><text x="575" y="204" text-anchor="middle" class="tx">list_tools</text>
+    <line x1="400" y1="254" x2="568" y2="254" class="e" marker-end="url(#q-a)"/><text x="485" y="248" text-anchor="middle" class="tx">system + history + prompt</text>
+    <line x1="570" y1="284" x2="402" y2="284" class="e d" marker-end="url(#q-a)"/><text x="485" y="278" text-anchor="middle" class="tx">AIMessage + tool_calls</text>
+    <line x1="400" y1="314" x2="748" y2="314" class="e" marker-end="url(#q-a)"/><text x="660" y="308" text-anchor="middle" class="tx">execute_blender_code</text>
+    <line x1="750" y1="344" x2="402" y2="344" class="e d" marker-end="url(#q-a)"/><text x="660" y="338" text-anchor="middle" class="tx">result → ToolMessage</text>
+    <line x1="570" y1="384" x2="402" y2="384" class="e d" marker-end="url(#q-a)"/><text x="485" y="378" text-anchor="middle" class="tx">final text</text>
+    <line x1="400" y1="420" x2="748" y2="420" class="e-a" marker-end="url(#q-h)"/><text x="575" y="414" text-anchor="middle" class="ta">save_file(tmp)</text>
+    <line x1="400" y1="450" x2="928" y2="450" class="e-a" marker-end="url(#q-h)"/><text x="840" y="444" text-anchor="middle" class="ta">① copy .blend + models row</text>
+    <line x1="400" y1="480" x2="72" y2="480" class="e d" marker-end="url(#q-a)"/><text x="235" y="474" text-anchor="middle" class="tx">SSE: assistant text</text>
+    <line x1="400" y1="510" x2="928" y2="510" class="e-a" marker-end="url(#q-h)"/><text x="840" y="504" text-anchor="middle" class="ta">② chats rows</text>
+    <line x1="230" y1="540" x2="72" y2="540" class="e d" marker-end="url(#q-a)"/><text x="150" y="534" text-anchor="middle" class="tx">200 completed</text>
+  </svg></div>
+  <figcaption>The highlighted band repeats for each round of tool calls. <b>① comes before ②:</b> the file is stamped before the turn's messages are written.</figcaption>
+  </figure>
+</section>
+
+<!-- 5. DATA -->
+<section>
+  <div class="sec-head"><div class="eyebrow">05 · Storage</div><h2>Four tables and one folder</h2></div>
+  <figure><div class="scroll">
+  <svg viewBox="0 0 1040 300" role="img" aria-label="projects has many sessions; a session has many chats and many models; each models row points to a .blend file in the data directory. sessions.name is the bookmark.">
+    <defs><marker id="d-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="mk"/></marker></defs>
+    <rect x="20" y="40" width="170" height="106" rx="6" class="k-db"/>
+    <rect x="20" y="40" width="170" height="26" rx="6" class="k-db"/>
+    <text x="32" y="58" class="th">projects</text>
+    <text x="32" y="86" class="tl">id</text><text x="32" y="104" class="tl">name</text>
+    <text x="32" y="122" class="ts">created_at</text><text x="32" y="140" class="ts">updated_at</text>
+
+    <rect x="250" y="40" width="210" height="106" rx="6" class="k-db"/>
+    <rect x="250" y="40" width="210" height="26" rx="6" class="k-db"/>
+    <text x="262" y="58" class="th">sessions</text>
+    <text x="262" y="86" class="tl">id · project_id</text>
+    <text x="262" y="104" class="ta">name  ← the bookmark</text>
+    <text x="262" y="122" class="ts">created_at</text><text x="262" y="140" class="ts">updated_at</text>
+
+    <rect x="540" y="14" width="220" height="124" rx="6" class="k-db"/>
+    <rect x="540" y="14" width="220" height="26" rx="6" class="k-db"/>
+    <text x="552" y="32" class="th">chats</text>
+    <text x="552" y="60" class="tl">id · session_id</text>
+    <text x="552" y="78" class="tl">role</text><text x="600" y="78" class="tx">user|assistant|tool|system</text>
+    <text x="552" y="96" class="tl">content</text>
+    <text x="552" y="114" class="tl">tool_calls</text><text x="640" y="114" class="tx">JSON</text>
+    <text x="552" y="132" class="ts">created_at (seconds)</text>
+
+    <rect x="540" y="160" width="220" height="124" rx="6" class="k-db"/>
+    <rect x="540" y="160" width="220" height="26" rx="6" class="k-db"/>
+    <text x="552" y="178" class="th">models</text>
+    <text x="552" y="206" class="tl">id · session_id</text>
+    <text x="552" y="224" class="tl">format</text><text x="608" y="224" class="tx">blend</text>
+    <text x="552" y="242" class="tl">path</text><text x="592" y="242" class="tx">unique</text>
+    <text x="552" y="260" class="tl">sha256 · size_bytes</text>
+    <text x="552" y="278" class="ts">created_at (seconds)</text>
+
+    <rect x="830" y="186" width="190" height="72" rx="6" class="box" style="stroke-dasharray:5 4"/>
+    <text x="844" y="208" class="th">data dir (disk)</text>
+    <text x="844" y="228" class="tx">models/{session_id}/</text>
+    <text x="844" y="244" class="tx">{project}-{UTC}.blend</text>
+
+    <line x1="190" y1="94" x2="248" y2="94" class="e" marker-end="url(#d-a)"/><text x="219" y="87" text-anchor="middle" class="tx">1 : n</text>
+    <path d="M460 82 H500 V60 H538" class="e" marker-end="url(#d-a)"/><text x="506" y="54" class="tx">1 : n</text>
+    <path d="M460 112 H500 V206 H538" class="e" marker-end="url(#d-a)"/><text x="506" y="226" class="tx">1 : n</text>
+    <line x1="760" y1="222" x2="828" y2="222" class="e d" marker-end="url(#d-a)"/><text x="794" y="215" text-anchor="middle" class="tx">path</text>
+  </svg></div>
+  <figcaption>All foreign keys are <code>ON DELETE CASCADE</code>. Deleting a project also removes each session's <code>models/{session_id}/</code> folder in code, since a cascade can't reach files. A row stores a path and a hash, never the bytes. Every save adds a copy and nothing is overwritten, so a session's <code>models</code> rows are its save history.</figcaption>
+  </figure>
+</section>
+
+</div>
+
+</body>
+</html>
