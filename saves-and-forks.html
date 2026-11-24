@@ -99,6 +99,7 @@ figcaption b { color: var(--ink); font-weight: 600; }
   <div class="eyebrow">Corbi · proposal · 17 Nov 2026</div>
   <h1>Saves and Forks</h1>
   <p class="lede">Every answered prompt already leaves a saved <code>.blend</code> and a timestamped chat history, so we don't need a bookmarks table. A save is the checkpoint, a timestamp ties it to its conversation, and carrying on from an older save starts a new session.</p>
+  <p style="font-size:14px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;max-width:none"><b>Status, 24 Nov 2026.</b> The session half is adopted: ADR-010 lists every session, makes <code>name</code> its title and removes the bookmark calls, and ADR-009 is superseded (#167). Save markers, the list-saves endpoint and forking from an older save are not built. The graph diagrams below show the harness as it was on 17 November; the <code>feedback</code> node has since been removed and the run streams its events directly. A fifth table, <code>attachments</code>, now also hangs off <code>sessions</code>. See the <a href="architecture.html" style="color:var(--accent)">architecture page</a> for the current graph.</p>
   <div class="tally">
     <div class="zero"><b>0</b><span>new tables</span></div>
     <div class="zero"><b>0</b><span>new columns</span></div>
