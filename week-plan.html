@@ -98,6 +98,11 @@ thead th { font: 500 11px var(--mono); color: var(--muted); text-transform: uppe
 .mk { fill: var(--ink); } .mk-a { fill: var(--accent); }
 .chip-a { fill: var(--accent); }
 .chip-t { font: 600 10.5px var(--mono); fill: var(--bg); }
+.st-chip { font: 600 10.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 99px; border: 1.5px solid; white-space: nowrap; }
+.st-done { color: var(--accent); border-color: var(--accent); background: var(--accent-t); }
+.st-part { color: var(--out); border-color: var(--out); background: var(--out-t); }
+.st-none { color: var(--muted); border-color: var(--line); }
+.card .st-chip { justify-self: start; }
 a.st rect { transition: stroke-width .15s; }
 a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
 </style>
@@ -111,39 +116,66 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
   <p class="lede">By Tuesday 24 November, Corbi checks what it builds in Blender, gives a reason for how every run ended, keeps each session in its own Blender file, and lets you run several sessions in a project and carry on from any answer. Five people each own one epic of three user stories.</p>
 </header>
 
+<!-- OUTCOME -->
+<section>
+  <h2>Where the week landed, 24 November</h2>
+  <p>Follow along shipped in full, and Shape it by chat shipped in a different form: objects are tagged by level and category instead of named, and edits pick their objects through tag filters. Termination and Sensors are partly there. Come back to my work did not start. Attachments and Windows support shipped off-plan. The plan below is kept as it was written.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Story</th><th>Status</th><th>What shipped</th><th>PRs</th></tr></thead>
+    <tbody>
+      <tr><td class="ids"><a href="#a1">A1</a></td><td><span class="st-chip st-part">partly</span></td><td>Each run's system prompt holds a scene outline: object counts per level and category, plus untagged ones. No sizes or positions; <code>find_objects</code> gives those on request.</td><td class="ids">#180</td></tr>
+      <tr><td class="ids"><a href="#a2">A2</a></td><td><span class="st-chip st-done">done, differently</span></td><td>Objects are tagged with level, category, space and more instead of readable names. A follow-up passes tag filters to <code>execute_blender_code</code>, and the code acts on <code>targets</code>, so only the matching objects change.</td><td class="ids">#178 #179 #180</td></tr>
+      <tr><td class="ids"><a href="#a3">A3</a></td><td><span class="st-chip st-none">not started</span></td><td>The bridge timeout is still 30 s per script and nothing tells the model to build in small steps.</td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#b1">B1</a></td><td><span class="st-chip st-part">partly</span></td><td>After every <code>execute_blender_code</code>, a tag check reports missing or invalid tags in the result and the model fixes them. No geometry checks yet: below ground, no volume or size.</td><td class="ids">#178</td></tr>
+      <tr><td class="ids"><a href="#b2">B2</a></td><td><span class="st-chip st-none">not started</span></td><td></td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#b3">B3</a></td><td><span class="st-chip st-none">not started</span></td><td>Failed tool calls are marked in the chat (E1), but there are no check results to show.</td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#c1">C1</a></td><td><span class="st-chip st-part">partly</span></td><td>The step limit is 100. When it runs out, the run stops cleanly: the chat and the file are saved, and the chat says to send "continue". No time limit, and no reason field on a run.</td><td class="ids">#188</td></tr>
+      <tr><td class="ids"><a href="#c2">C2</a></td><td><span class="st-chip st-part">partly</span></td><td>Stop closes the stream and cancels the run on the server, and the next prompt runs normally. Nothing from a stopped run is kept: no chat rows, no save.</td><td class="ids">#148</td></tr>
+      <tr><td class="ids"><a href="#c3">C3</a></td><td><span class="st-chip st-none">not started</span></td><td></td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#d1">D1</a></td><td><span class="st-chip st-none">not started</span></td><td>Each answer still saves a <code>.blend</code> and a <code>models</code> row, but the chat doesn't show them.</td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#d2">D2</a></td><td><span class="st-chip st-none">not started</span></td><td></td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#d3">D3</a></td><td><span class="st-chip st-none">not started</span></td><td></td><td class="ids"></td></tr>
+      <tr><td class="ids"><a href="#e1">E1</a></td><td><span class="st-chip st-done">done</span></td><td>The app-wide feed is gone. Each run streams its own events in the response to <code>POST /agent/run/stream</code>, and a failed tool call shows as failed.</td><td class="ids">#148 #150</td></tr>
+      <tr><td class="ids"><a href="#e2">E2</a></td><td><span class="st-chip st-done">done</span></td><td>A sessions sidebar lists every session; new, open, rename and delete; the workspace fills the window. Bookmarks are replaced by <code>GET /projects/{id}/sessions</code> (ADR-010). New sessions don't get an empty Blender file, since D2 didn't land.</td><td class="ids">#167 #168</td></tr>
+      <tr><td class="ids"><a href="#e3">E3</a></td><td><span class="st-chip st-done">done</span></td><td>The provider's small model titles a session from its first prompt, alongside the run. A name typed first is kept, and a failed call leaves the name empty.</td><td class="ids">#169</td></tr>
+      <tr><td>Off-plan</td><td><span class="st-chip st-done">done</span></td><td>Attach PDFs and images to a session and send them with a prompt (ADR-011). Blender found on Windows, and the programs checks no longer block the server. Repositories moved into <code>services/</code>.</td><td class="ids">#162–#164 #152 #154 #156 #126</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
 <!-- EPICS -->
 <section>
   <h2>Five epics, three stories each</h2>
   <div class="matrix">
     <div class="epic">
       <div class="epic-head"><h3>Shape it by chat</h3><span class="box">Context · Guides</span></div>
-      <a class="card" href="#a1"><span class="id">A1</span><div class="t">Every run starts from the current scene</div><div class="from">from #85</div></a>
-      <a class="card" href="#a2"><span class="id">A2</span><div class="t">Refer to each building by name</div><div class="from">new</div></a>
-      <a class="card" href="#a3"><span class="id">A3</span><div class="t">Big builds go in small steps that are safe to repeat</div><div class="from">UAT</div></a>
+      <a class="card" href="#a1"><span class="id">A1</span><div class="t">Every run starts from the current scene</div><div class="from">from #85</div><span class="st-chip st-part">partly</span></a>
+      <a class="card" href="#a2"><span class="id">A2</span><div class="t">Refer to each building by name</div><div class="from">new</div><span class="st-chip st-done">done, differently</span></a>
+      <a class="card" href="#a3"><span class="id">A3</span><div class="t">Big builds go in small steps that are safe to repeat</div><div class="from">UAT</div><span class="st-chip st-none">not started</span></a>
     </div>
     <div class="epic">
       <div class="epic-head box-h"><h3>Check what was built</h3><span class="box">Sensors · new</span></div>
-      <a class="card" href="#b1"><span class="id">B1</span><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div></a>
-      <a class="card" href="#b2"><span class="id">B2</span><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div></a>
-      <a class="card" href="#b3"><span class="id">B3</span><div class="t">See which checks passed under each answer</div><div class="from">new</div></a>
+      <a class="card" href="#b1"><span class="id">B1</span><div class="t">Corbi checks every change it makes and fixes its own mistakes</div><div class="from">new</div><span class="st-chip st-part">partly</span></a>
+      <a class="card" href="#b2"><span class="id">B2</span><div class="t">Answers quote the figures measured in Blender</div><div class="from">new</div><span class="st-chip st-none">not started</span></a>
+      <a class="card" href="#b3"><span class="id">B3</span><div class="t">See which checks passed under each answer</div><div class="from">new</div><span class="st-chip st-none">not started</span></a>
     </div>
     <div class="epic">
       <div class="epic-head box-h"><h3>Finish a run cleanly</h3><span class="box">Termination · new</span></div>
-      <a class="card" href="#c1"><span class="id">C1</span><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div></a>
-      <a class="card" href="#c2"><span class="id">C2</span><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div></a>
-      <a class="card" href="#c3"><span class="id">C3</span><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div></a>
+      <a class="card" href="#c1"><span class="id">C1</span><div class="t">Every run ends within a step and time limit, and says why</div><div class="from">new</div><span class="st-chip st-part">partly</span></a>
+      <a class="card" href="#c2"><span class="id">C2</span><div class="t">Stop a run that is going the wrong way</div><div class="from">new</div><span class="st-chip st-part">partly</span></a>
+      <a class="card" href="#c3"><span class="id">C3</span><div class="t">Corbi stops and asks when the same check keeps failing</div><div class="from">new</div><span class="st-chip st-none">not started</span></a>
     </div>
     <div class="epic">
       <div class="epic-head"><h3>Come back to my work</h3><span class="box">Memory · saves</span></div>
-      <a class="card" href="#d1"><span class="id">D1</span><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div></a>
-      <a class="card" href="#d2"><span class="id">D2</span><div class="t">Blender always shows this session's own file</div><div class="from">from #87, UAT</div></a>
-      <a class="card" href="#d3"><span class="id">D3</span><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div></a>
+      <a class="card" href="#d1"><span class="id">D1</span><div class="t">See a save after every answer that changed Blender</div><div class="from">from #87</div><span class="st-chip st-none">not started</span></a>
+      <a class="card" href="#d2"><span class="id">D2</span><div class="t">Blender always shows this session's own file</div><div class="from">from #87, UAT</div><span class="st-chip st-none">not started</span></a>
+      <a class="card" href="#d3"><span class="id">D3</span><div class="t">Carry on from an earlier save in a new session</div><div class="from">replaces bookmarks</div><span class="st-chip st-none">not started</span></a>
     </div>
     <div class="epic">
       <div class="epic-head"><h3>Follow along</h3><span class="box">Progress feed · sessions</span></div>
-      <a class="card" href="#e1"><span class="id">E1</span><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div></a>
-      <a class="card" href="#e2"><span class="id">E2</span><div class="t">Run several sessions in a project, in a wider workspace</div><div class="from">UAT · replaces bookmarks</div></a>
-      <a class="card" href="#e3"><span class="id">E3</span><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div></a>
+      <a class="card" href="#e1"><span class="id">E1</span><div class="t">See only my session's steps, with failures marked</div><div class="from">from #102</div><span class="st-chip st-done">done</span></a>
+      <a class="card" href="#e2"><span class="id">E2</span><div class="t">Run several sessions in a project, in a wider workspace</div><div class="from">UAT · replaces bookmarks</div><span class="st-chip st-done">done</span></a>
+      <a class="card" href="#e3"><span class="id">E3</span><div class="t">Sessions name themselves from my first prompt</div><div class="from">new</div><span class="st-chip st-done">done</span></a>
     </div>
   </div>
 </section>
@@ -318,14 +350,14 @@ a.st:hover rect, a.st:focus-visible rect { stroke-width: 3; }
 <section>
   <h2>Decide these first</h2>
   <div class="tbl"><table>
-    <thead><tr><th>Decision</th><th>Proposed</th><th>Blocks</th></tr></thead>
+    <thead><tr><th>Decision</th><th>Proposed</th><th>Blocks</th><th>Outcome</th></tr></thead>
     <tbody>
-      <tr><td>Step limit and time limit for a run</td><td>12 model turns, 120 seconds</td><td class="ids"><a href="#c1">C1</a></td></tr>
-      <tr><td>Thresholds for the checks</td><td>Ground at z = 0; no side longer than 500 m</td><td class="ids"><a href="#b1">B1</a></td></tr>
-      <tr><td>Floor-to-floor height used to count storeys</td><td>3.5 m</td><td class="ids"><a href="#b2">B2</a></td></tr>
-      <tr><td>Letting the model run Blender code, which ADR-004 now allows and AGENTS.md hard rule 2 forbids</td><td>Keep it, with B1's checks as the guard. A new ADR supersedes ADR-004, and hard rule 2 is reworded</td><td class="ids"><a href="#b1">B1</a></td></tr>
-      <tr><td>How long one Blender script may run before the bridge gives up</td><td>Keep the bridge at 30 s; tell the model to aim for under 8 s per script</td><td class="ids"><a href="#a3">A3</a> <a href="#b1">B1</a></td></tr>
-      <tr><td>Saves and forks replace bookmarks</td><td>New ADR; ADR-009 withdrawn while still Proposed</td><td class="ids"><a href="#d3">D3</a> <a href="#e2">E2</a></td></tr>
+      <tr><td>Step limit and time limit for a run</td><td>12 model turns, 120 seconds</td><td class="ids"><a href="#c1">C1</a></td><td>100 graph steps, no time limit</td></tr>
+      <tr><td>Thresholds for the checks</td><td>Ground at z = 0; no side longer than 500 m</td><td class="ids"><a href="#b1">B1</a></td><td>Open</td></tr>
+      <tr><td>Floor-to-floor height used to count storeys</td><td>3.5 m</td><td class="ids"><a href="#b2">B2</a></td><td>Open</td></tr>
+      <tr><td>Letting the model run Blender code, which ADR-004 now allows and AGENTS.md hard rule 2 forbids</td><td>Keep it, with B1's checks as the guard. A new ADR supersedes ADR-004, and hard rule 2 is reworded</td><td class="ids"><a href="#b1">B1</a></td><td>Kept. ADR-004 allows it and hard rule 2 now says so (#186)</td></tr>
+      <tr><td>How long one Blender script may run before the bridge gives up</td><td>Keep the bridge at 30 s; tell the model to aim for under 8 s per script</td><td class="ids"><a href="#a3">A3</a> <a href="#b1">B1</a></td><td>Bridge kept at 30 s; no script guidance yet</td></tr>
+      <tr><td>Saves and forks replace bookmarks</td><td>New ADR; ADR-009 withdrawn while still Proposed</td><td class="ids"><a href="#d3">D3</a> <a href="#e2">E2</a></td><td>ADR-010 lists every session and drops bookmarks; ADR-009 superseded. Forks not decided</td></tr>
     </tbody>
   </table></div>
 </section>
